@@ -1,1 +1,6 @@
-<p>home works!</p>
+<div style="min-height:100vh; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:12px;">
+  <h2>Home / Dashboard</h2>
+  <p>Bienvenido: <b>{{ user }}</b></p>
+
+  <p-button label="Cerrar sesión" severity="danger" (onClick)="logout()"></p-button>
+</div>

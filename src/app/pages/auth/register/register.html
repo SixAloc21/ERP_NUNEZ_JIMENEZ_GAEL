@@ -1,13 +1,68 @@
-<div style="height:100vh; display:flex; justify-content:center; align-items:center; background:white;">
-  <div style="width:320px; display:flex; flex-direction:column; gap:12px;">
+<p-toast></p-toast>
+
+<div style="min-height:100vh; display:flex; justify-content:center; align-items:center; padding:24px; background:#fff;">
+  <div style="width:420px; display:flex; flex-direction:column; gap:12px;">
+
     <h2 style="margin:0;">Registro</h2>
 
-    <input type="text" placeholder="Nombre" [(ngModel)]="name">
-    <input type="email" placeholder="Correo" [(ngModel)]="email">
-    <input type="password" placeholder="Contraseña" [(ngModel)]="password">
+    <!-- Usuario -->
+    <input pInputText type="text" placeholder="Usuario" [(ngModel)]="usuario" />
+    <p-message *ngIf="usuario !== '' && usuario.trim().length === 0"
+               severity="warn" text="Usuario no puede estar vacío"></p-message>
 
-    <button (click)="register()">Crear cuenta</button>
+    <!-- Email -->
+    <input pInputText type="email" placeholder="Email" [(ngModel)]="email" />
+    <p-message *ngIf="email && !isEmailValid()"
+               severity="warn" text="Email inválido"></p-message>
 
-    <a routerLink="/auth/login">Ya tengo cuenta</a>
+    <!-- Nombre completo -->
+    <input pInputText type="text" placeholder="Nombre completo" [(ngModel)]="nombreCompleto" />
+    <p-message *ngIf="nombreCompleto !== '' && nombreCompleto.trim().length === 0"
+               severity="warn" text="Nombre completo requerido"></p-message>
+
+    <!-- Dirección -->
+    <input pInputText type="text" placeholder="Dirección" [(ngModel)]="direccion" />
+    <p-message *ngIf="direccion !== '' && direccion.trim().length === 0"
+               severity="warn" text="Dirección requerida"></p-message>
+
+    <!-- Teléfono -->
+    <p-inputMask mask="9999999999" placeholder="Teléfono (10 dígitos)" [(ngModel)]="telefono"></p-inputMask>
+    <p-message *ngIf="telefono && !isPhoneValid()"
+               severity="warn" text="Teléfono inválido (10 números)"></p-message>
+
+    <!-- Fecha de nacimiento / Mayor de edad -->
+    <p-datepicker [(ngModel)]="fechaNacimiento"
+                  placeholder="Fecha de nacimiento"
+                  [showIcon]="true"></p-datepicker>
+
+    <p-message *ngIf="fechaNacimiento && !isAdult()"
+               severity="error" text="Solo mayores de edad (18+)"></p-message>
+
+    <!-- Password -->
+    <p-password [(ngModel)]="password"
+                placeholder="Contraseña"
+                [toggleMask]="true"></p-password>
+
+    <p-message *ngIf="password && password.length < 10"
+               severity="warn" text="Mínimo 10 caracteres"></p-message>
+
+    <p-message *ngIf="password && password.length >= 10 && !hasSpecialSymbol(password)"
+               severity="warn" text="Debe incluir al menos 1 símbolo: ! @ # $ % ^ & *"></p-message>
+
+    <!-- Confirmación -->
+    <p-password [(ngModel)]="confirmPassword"
+                placeholder="Confirmar contraseña"
+                [toggleMask]="true"></p-password>
+
+    <p-message *ngIf="confirmPassword && !isConfirmValid()"
+               severity="error" text="Las contraseñas no coinciden"></p-message>
+
+    <!-- Botón -->
+    <p-button label="Registrarme"
+              severity="success"
+              [disabled]="!canSubmit"
+              (onClick)="register()"></p-button>
+
+    <a routerLink="/auth/login" style="text-align:center; text-decoration:none;">Ya tengo cuenta → Login</a>
   </div>
 </div>

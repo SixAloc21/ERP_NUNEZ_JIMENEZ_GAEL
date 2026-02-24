@@ -6,19 +6,17 @@ import { ButtonModule } from 'primeng/button';
   selector: 'app-home',
   standalone: true,
   imports: [ButtonModule],
-  template: `
-    <div style="height:100vh; display:flex; justify-content:center; align-items:center; flex-direction:column; gap:12px;">
-      <h2>Home / Dashboard</h2>
-
-      <p-button label="Cerrar sesión" severity="danger" (onClick)="logout()"></p-button>
-    </div>
-  `,
+  templateUrl: './home.html',
+  styleUrls: ['./home.css'],
 })
 export class HomeComponent {
+  user = localStorage.getItem('loggedUser') || 'usuario';
+
   constructor(private router: Router) {}
 
   logout() {
     localStorage.removeItem('token');
+    localStorage.removeItem('loggedUser');
     this.router.navigate(['/auth/login']);
   }
 }
