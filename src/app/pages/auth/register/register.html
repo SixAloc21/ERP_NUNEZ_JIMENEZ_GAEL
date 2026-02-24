@@ -1,0 +1,13 @@
+<div style="height:100vh; display:flex; justify-content:center; align-items:center; background:white;">
+  <div style="width:320px; display:flex; flex-direction:column; gap:12px;">
+    <h2 style="margin:0;">Registro</h2>
+
+    <input type="text" placeholder="Nombre" [(ngModel)]="name">
+    <input type="email" placeholder="Correo" [(ngModel)]="email">
+    <input type="password" placeholder="Contraseña" [(ngModel)]="password">
+
+    <button (click)="register()">Crear cuenta</button>
+
+    <a routerLink="/auth/login">Ya tengo cuenta</a>
+  </div>
+</div>
