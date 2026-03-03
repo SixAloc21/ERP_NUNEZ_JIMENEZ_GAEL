@@ -1,0 +1,123 @@
+.sb{
+  width: 260px;
+  height: 100vh;
+  background: linear-gradient(180deg, #0b1220 0%, #0f172a 100%);
+  color: #e5e7eb;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-right: 1px solid rgba(255,255,255,.08);
+}
+
+.brand{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.04);
+}
+
+.logo{
+  width: 42px;
+  height: 42px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-weight: 900;
+  background: rgba(59,130,246,.25);
+  border: 1px solid rgba(59,130,246,.35);
+}
+
+.brand-txt .title{ font-weight: 900; letter-spacing: .2px; }
+.brand-txt .sub{ font-size: 12px; opacity: .75; margin-top: 2px; }
+
+.user{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.03);
+  border: 1px solid rgba(255,255,255,.06);
+}
+
+.avatar{
+  width: 38px;
+  height: 38px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  background: rgba(255,255,255,.08);
+}
+
+.user-txt .name{ font-weight: 800; }
+.user-txt .role{ font-size: 12px; opacity: .7; margin-top: 2px; }
+
+.menu{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.section{
+  margin: 10px 4px 2px;
+  font-size: 12px;
+  opacity: .7;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.item{
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  text-decoration: none;
+  color: #e5e7eb;
+  border: 1px solid transparent;
+}
+
+.item:hover{
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.08);
+}
+
+.item.active{
+  background: rgba(59,130,246,.18);
+  border-color: rgba(59,130,246,.30);
+}
+
+.dot{
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.35);
+}
+.item.active .dot{ background: #3b82f6; }
+
+.disabled{
+  opacity: .45;
+  pointer-events: none;
+}
+
+.footer{
+  margin-top: auto;
+}
+
+.w-100{ width: 100%; }
+
+.sidebar {
+  width: 220px;
+  background: #1e293b;
+  color: white;
+  padding: 1rem;
+}
+
+.sidebar h3 {
+  margin-bottom: 2rem;
+}

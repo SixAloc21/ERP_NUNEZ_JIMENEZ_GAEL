@@ -1,0 +1,34 @@
+<h1>User</h1>
+
+<p-card header="Profile Data">
+  <div class="profile-grid">
+    <div><b>Usuario:</b> {{ perfil.usuario }}</div>
+    <div><b>Email:</b> {{ perfil.email }}</div>
+    <div><b>Nombre completo:</b> {{ perfil.nombreCompleto }}</div>
+    <div><b>Dirección:</b> {{ perfil.direccion }}</div>
+    <div><b>Teléfono:</b> {{ perfil.telefono }}</div>
+    <div><b>Fecha de nacimiento:</b> {{ perfil.fechaNacimiento }}</div>
+  </div>
+
+  <div class="actions">
+    <button pButton label="Editar" icon="pi pi-pencil" (click)="abrirEditar()"></button>
+    <button pButton label="Eliminar" icon="pi pi-trash" severity="danger" (click)="eliminarPerfil()"></button>
+  </div>
+</p-card>
+
+<!-- ✅ MODAL UPDATE -->
+<p-dialog header="Editar Perfil" [(visible)]="modalVisible" [modal]="true" [style]="{width:'420px'}">
+  <div class="p-fluid form">
+    <input pInputText [(ngModel)]="editPerfil.usuario" placeholder="Usuario" />
+    <input pInputText [(ngModel)]="editPerfil.email" placeholder="Email" />
+    <input pInputText [(ngModel)]="editPerfil.nombreCompleto" placeholder="Nombre completo" />
+    <input pInputText [(ngModel)]="editPerfil.direccion" placeholder="Dirección" />
+    <input pInputText [(ngModel)]="editPerfil.telefono" placeholder="Teléfono" />
+    <input pInputText [(ngModel)]="editPerfil.fechaNacimiento" placeholder="Fecha de nacimiento" />
+  </div>
+
+  <ng-template pTemplate="footer">
+    <button pButton label="Cancelar" class="p-button-text" (click)="modalVisible=false"></button>
+    <button pButton label="Guardar" icon="pi pi-check" (click)="guardarCambios()"></button>
+  </ng-template>
+</p-dialog>

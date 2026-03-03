@@ -1,0 +1,83 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+/* Fondo */
+.auth-bg{
+  min-height: 100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  padding:24px;
+  background: radial-gradient(circle at 20% 10%, #eef3ff 0%, #ffffff 45%, #f6f6f6 100%);
+}
+
+/* Tarjeta */
+.auth-card{
+  width: 420px;
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(0,0,0,.06);
+  border-radius: 18px;
+  box-shadow: 0 18px 50px rgba(0,0,0,.10);
+  padding: 22px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* detalle sutil */
+.auth-card::before{
+  content:"";
+  position:absolute;
+  inset: -40px -80px auto auto;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: rgba(59,130,246,.18);
+  filter: blur(2px);
+}
+
+/* layout */
+.auth-stack{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+  position: relative;
+}
+
+/* título */
+.auth-title{
+  margin: 0 0 6px;
+  font-size: 28px;
+  font-weight: 800;
+}
+
+/* Inputs full width (PrimeNG) */
+:host ::ng-deep input.p-inputtext,
+:host ::ng-deep .p-password,
+:host ::ng-deep .p-password input{
+  width: 100%;
+  border-radius: 12px;
+}
+
+/* botón full */
+:host ::ng-deep .auth-btn .p-button{
+  width:100%;
+  border-radius: 12px;
+}
+
+/* link */
+.auth-link{
+  text-align:center;
+  text-decoration:none;
+  font-weight:600;
+  opacity:.85;
+}
+.auth-link:hover{ opacity:1; }
+
+/* demo */
+.auth-demo{
+  text-align:center;
+  opacity:.65;
+  font-size:12px;
+}

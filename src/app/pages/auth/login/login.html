@@ -1,31 +1,29 @@
 <p-toast></p-toast>
 
-<div style="min-height:100vh; display:flex; justify-content:center; align-items:center; padding:24px; background:#fff;">
-  <div style="width:420px; display:flex; flex-direction:column; gap:12px;">
-    <h2 style="margin:0;">Iniciar sesión</h2>
+<div class="auth-bg">
+  <div class="auth-card">
+    <div class="auth-stack">
+      <h2 class="auth-title">Iniciar sesión</h2>
 
-    <input pInputText type="text" placeholder="Usuario" [(ngModel)]="usuario" />
-    <p-message *ngIf="usuario !== '' && usuario.trim().length === 0"
-               severity="warn" text="Usuario no puede estar vacío"></p-message>
+      <input pInputText type="text" placeholder="Usuario" [(ngModel)]="usuario" />
 
-    <p-password [(ngModel)]="password"
-                placeholder="Contraseña"
-                [toggleMask]="true"></p-password>
+      <p-password
+        [(ngModel)]="password"
+        placeholder="Contraseña"
+        [toggleMask]="true">
+      </p-password>
 
-    <p-message *ngIf="password !== '' && password.trim().length === 0"
-               severity="warn" text="Contraseña no puede estar vacía"></p-message>
+      <p-button
+        class="auth-btn"
+        label="Entrar"
+        severity="info"
+        [disabled]="!canLogin"
+        (onClick)="login()">
+      </p-button>
 
-    <p-button label="Entrar"
-              severity="info"
-              [disabled]="!canLogin"
-              (onClick)="login()"></p-button>
+      <a class="auth-link" routerLink="/auth/register">No tengo cuenta → Registrarme</a>
 
-    <a routerLink="/auth/register" style="text-align:center; text-decoration:none;">
-      No tengo cuenta → Registrarme
-    </a>
-
-    <small style="opacity:.7; text-align:center;">
-      Demo: usuario <b>Gael</b> / pass <b>Gael!2004##</b>
-    </small>
+      <small class="auth-demo">Demo: usuario <b>Gael</b> / pass <b>Gael!2004##</b></small>
+    </div>
   </div>
 </div>

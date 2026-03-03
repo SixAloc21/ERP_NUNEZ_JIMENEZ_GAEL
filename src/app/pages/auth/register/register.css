@@ -1,0 +1,25 @@
+:host {
+  display:block;
+  min-height:100vh;
+}
+
+/* Reusa el mismo layout pero cambia vibe */
+.auth-bg-register{
+  background: radial-gradient(circle at 80% 10%, #eafff3 0%, #ffffff 45%, #f6f6f6 100%);
+}
+
+.auth-card-register{
+  width: 460px;
+}
+
+/* PrimeNG full width */
+:host ::ng-deep input.p-inputtext,
+:host ::ng-deep .p-password,
+:host ::ng-deep .p-password input,
+:host ::ng-deep .p-inputmask,
+:host ::ng-deep .p-inputmask input,
+:host ::ng-deep .p-datepicker,
+:host ::ng-deep .p-datepicker input{
+  width: 100%;
+  border-radius: 12px;
+}

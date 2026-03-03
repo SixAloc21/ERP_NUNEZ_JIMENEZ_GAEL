@@ -1,0 +1,87 @@
+<aside class="sb">
+  <!-- Brand -->
+  <div class="brand">
+    <div class="logo">A</div>
+    <div class="brand-txt">
+      <div class="title">Proyecto</div>
+      <div class="sub">Dashboard</div>
+    </div>
+  </div>
+
+  <!-- User -->
+  <div class="user">
+    <div class="avatar">{{ usuario.charAt(0) }}</div>
+    <div class="user-txt">
+      <div class="name">{{ usuario }}</div>
+      <div class="role">Usuario</div>
+    </div>
+  </div>
+
+  <!-- Menu -->
+  <nav class="menu">
+    <div class="section">General</div>
+
+    <a routerLink="/home" routerLinkActive="active" class="item">
+      <span class="dot"></span>
+      <span>Home</span>
+    </a>
+
+    <a
+      routerLink="/"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: true }"
+      class="item"
+    >
+      <span class="dot"></span>
+      <span>Landing</span>
+    </a>
+
+    <div class="section">Pages</div>
+
+    <a routerLink="/group" routerLinkActive="active" class="item">
+      <span class="dot"></span>
+      <span>Group</span>
+    </a>
+
+    <a routerLink="/user" routerLinkActive="active" class="item">
+      <span class="dot"></span>
+      <span>User</span>
+    </a>
+
+    <div class="section">Módulos</div>
+
+    <a
+      routerLink="/ofertas"
+      routerLinkActive="active"
+      class="item disabled"
+      tabindex="-1"
+      aria-disabled="true"
+    >
+      <span class="dot"></span>
+      <span>Ofertas (próx.)</span>
+    </a>
+
+    <a
+      routerLink="/divisiones"
+      routerLinkActive="active"
+      class="item disabled"
+      tabindex="-1"
+      aria-disabled="true"
+    >
+      <span class="dot"></span>
+      <span>Divisiones (próx.)</span>
+    </a>
+  </nav>
+
+  <!-- Footer -->
+  <div class="footer">
+    <button
+      pButton
+      type="button"
+      label="Cerrar sesión"
+      severity="secondary"
+      class="w-100"
+      (click)="logout()"
+    ></button>
+  </div>
+</aside>
