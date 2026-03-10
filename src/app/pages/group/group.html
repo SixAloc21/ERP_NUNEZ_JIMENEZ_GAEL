@@ -1,54 +1,410 @@
-<h2>CRUD - Groups</h2>
+<div class="group-page">
 
-<button pButton label="Agregar Group" icon="pi pi-plus" (click)="openNew()"></button>
+  <div class="topbar">
+    <div>
+      <h2 class="title">Gestión de Grupo</h2>
+      <p class="subtitle">Administra el grupo y visualiza sus tickets</p>
+    </div>
 
-<p-table [value]="groups" class="mt-3">
-  <ng-template pTemplate="header">
-    <tr>
-      <th>Nombre</th>
-      <th>Nivel</th>
-      <th>Autor</th>
-      <th>Integrantes</th>
-      <th>Tickets</th>
-      <th>Acciones</th>
-    </tr>
-  </ng-template>
+    <div class="toggle-buttons">
+      <button
+        pButton
+        type="button"
+        label="Grupo"
+        [outlined]="currentView !== 'grupo'"
+        (click)="setView('grupo')">
+      </button>
 
-  <ng-template pTemplate="body" let-group>
-    <tr>
-      <td>{{ group.nombre }}</td>
-      <td>{{ group.nivel }}</td>
-      <td>{{ group.autor }}</td>
-      <td>{{ group.integrantes }}</td>
-      <td>{{ group.tickets }}</td>
-      <td>
-        <button pButton icon="pi pi-pencil" class="p-button-text"
-          (click)="editGroup(group)"></button>
-        <button pButton icon="pi pi-trash" class="p-button-text p-button-danger"
-          (click)="deleteGroup(group)"></button>
-      </td>
-    </tr>
-  </ng-template>
-</p-table>
+      <button
+        pButton
+        type="button"
+        label="Tickets"
+        [outlined]="currentView !== 'tickets'"
+        (click)="setView('tickets')">
+      </button>
+    </div>
+  </div>
 
-<!-- MODAL -->
-<p-dialog header="Group" [(visible)]="dialogVisible" [modal]="true" [style]="{width:'400px'}">
+  <!-- VISTA GRUPO -->
+  <div *ngIf="currentView === 'grupo'">
 
-  <div class="p-fluid">
+    <div class="info-grid" *ngIf="selectedGroup as group">
+      <div class="info-card">
+        <span class="label">Nombre</span>
+        <h3>{{ group.nombre }}</h3>
+      </div>
 
-    <input pInputText [(ngModel)]="currentGroup.nombre" placeholder="Nombre" />
-    <input pInputText [(ngModel)]="currentGroup.nivel" placeholder="Nivel" />
-    <input pInputText [(ngModel)]="currentGroup.autor" placeholder="Autor" />
-    <input pInputText type="number" [(ngModel)]="currentGroup.integrantes" placeholder="Integrantes" />
-    <input pInputText type="number" [(ngModel)]="currentGroup.tickets" placeholder="Tickets" />
-    <input pInputText [(ngModel)]="currentGroup.descripcion" placeholder="Descripción" />
+      <div class="info-card">
+        <span class="label">Nivel</span>
+        <h3>{{ group.nivel }}</h3>
+      </div>
+
+      <div class="info-card">
+        <span class="label">Autor</span>
+        <h3>{{ group.autor }}</h3>
+      </div>
+
+      <div class="info-card">
+        <span class="label">Integrantes</span>
+        <h3>{{ members.length }}</h3>
+      </div>
+
+      <div class="info-card">
+        <span class="label">Tickets</span>
+        <h3>{{ ticketsList.length }}</h3>
+      </div>
+
+      <div class="info-card wide">
+        <span class="label">Descripción</span>
+        <h3>{{ group.descripcion }}</h3>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h3>Integrantes del grupo</h3>
+      <div class="actions">
+        <button
+          pButton
+          type="button"
+          label="Editar Group"
+          icon="pi pi-pencil"
+          severity="secondary"
+          (click)="selectedGroup && editGroup(selectedGroup)">
+        </button>
+
+        <button
+          pButton
+          type="button"
+          label="Agregar miembro"
+          icon="pi pi-user-plus"
+          (click)="openNewMember()">
+        </button>
+      </div>
+    </div>
+
+    <p-table [value]="members" class="custom-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-member>
+        <tr>
+          <td>{{ member.nombre }}</td>
+          <td>{{ member.email }}</td>
+          <td>{{ member.rol }}</td>
+          <td class="action-buttons">
+            <button
+              pButton
+              icon="pi pi-pencil"
+              class="p-button-text"
+              (click)="editMember(member)">
+            </button>
+
+            <button
+              pButton
+              icon="pi pi-trash"
+              class="p-button-text p-button-danger"
+              (click)="deleteMember(member)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+
+    <div class="section-header mt">
+      <h3>CRUD - Groups</h3>
+      <button
+        pButton
+        type="button"
+        label="Agregar Group"
+        icon="pi pi-plus"
+        (click)="openNew()">
+      </button>
+    </div>
+
+    <p-table [value]="groups" class="custom-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Nombre</th>
+          <th>Nivel</th>
+          <th>Autor</th>
+          <th>Integrantes</th>
+          <th>Tickets</th>
+          <th>Acciones</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-group>
+        <tr>
+          <td>{{ group.nombre }}</td>
+          <td>{{ group.nivel }}</td>
+          <td>{{ group.autor }}</td>
+          <td>{{ group.integrantes }}</td>
+          <td>{{ group.tickets }}</td>
+          <td class="action-buttons">
+            <button
+              pButton
+              icon="pi pi-pencil"
+              class="p-button-text"
+              (click)="editGroup(group)">
+            </button>
+
+            <button
+              pButton
+              icon="pi pi-trash"
+              class="p-button-text p-button-danger"
+              (click)="deleteGroup(group)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
 
   </div>
 
-  <ng-template pTemplate="footer">
-    <button pButton label="Cancelar" class="p-button-text"
-      (click)="dialogVisible=false"></button>
-    <button pButton label="Guardar" (click)="saveGroup()"></button>
-  </ng-template>
+  <!-- VISTA TICKETS -->
+  <div *ngIf="currentView === 'tickets'">
 
-</p-dialog>
+    <div class="cards">
+      <div class="resume-card">
+        <span>Total tickets</span>
+        <h3>{{ ticketsList.length }}</h3>
+      </div>
+
+      <div class="resume-card">
+        <span>Pendientes</span>
+        <h3>{{ pendientes }}</h3>
+      </div>
+
+      <div class="resume-card">
+        <span>En progreso</span>
+        <h3>{{ enProgreso }}</h3>
+      </div>
+
+      <div class="resume-card">
+        <span>Revisión</span>
+        <h3>{{ revision }}</h3>
+      </div>
+
+      <div class="resume-card">
+        <span>Finalizados</span>
+        <h3>{{ finalizados }}</h3>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h3>Tickets del grupo</h3>
+
+      <div class="actions">
+        <div class="toggle-buttons">
+          <button
+            pButton
+            type="button"
+            label="Lista"
+            [outlined]="ticketView !== 'lista'"
+            (click)="setTicketView('lista')">
+          </button>
+
+          <button
+            pButton
+            type="button"
+            label="Kanban"
+            [outlined]="ticketView !== 'kanban'"
+            (click)="setTicketView('kanban')">
+          </button>
+        </div>
+
+        <button
+          pButton
+          type="button"
+          label="Crear Ticket"
+          icon="pi pi-plus"
+          (click)="openNewTicket()">
+        </button>
+      </div>
+    </div>
+
+    <!-- LISTA -->
+    <div *ngIf="ticketView === 'lista'">
+      <p-table [value]="ticketsList" class="custom-table">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Título</th>
+            <th>Descripción</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Asignado a</th>
+            <th>Fecha creación</th>
+            <th>Fecha límite</th>
+            <th>Acciones</th>
+          </tr>
+        </ng-template>
+
+        <ng-template pTemplate="body" let-ticket>
+          <tr>
+            <td>{{ ticket.titulo }}</td>
+            <td>{{ ticket.descripcion }}</td>
+            <td>{{ ticket.estado }}</td>
+            <td>{{ ticket.prioridad }}</td>
+            <td>{{ ticket.asignadoA }}</td>
+            <td>{{ ticket.fechaCreacion }}</td>
+            <td>{{ ticket.fechaLimite }}</td>
+            <td class="action-buttons">
+              <button
+                pButton
+                icon="pi pi-pencil"
+                class="p-button-text"
+                (click)="editTicket(ticket)">
+              </button>
+
+              <button
+                pButton
+                icon="pi pi-trash"
+                class="p-button-text p-button-danger"
+                (click)="deleteTicket(ticket)">
+              </button>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    </div>
+
+    <!-- KANBAN -->
+    <div *ngIf="ticketView === 'kanban'" class="kanban-board">
+      <div class="kanban-column">
+        <div class="kanban-title">Pendiente</div>
+        <div class="kanban-ticket" *ngFor="let ticket of ticketsPendientes">
+          <h4>{{ ticket.titulo }}</h4>
+          <p>{{ ticket.descripcion }}</p>
+          <span>{{ ticket.prioridad }} · {{ ticket.asignadoA }}</span>
+        </div>
+      </div>
+
+      <div class="kanban-column">
+        <div class="kanban-title">En progreso</div>
+        <div class="kanban-ticket" *ngFor="let ticket of ticketsEnProgreso">
+          <h4>{{ ticket.titulo }}</h4>
+          <p>{{ ticket.descripcion }}</p>
+          <span>{{ ticket.prioridad }} · {{ ticket.asignadoA }}</span>
+        </div>
+      </div>
+
+      <div class="kanban-column">
+        <div class="kanban-title">Revisión</div>
+        <div class="kanban-ticket" *ngFor="let ticket of ticketsRevision">
+          <h4>{{ ticket.titulo }}</h4>
+          <p>{{ ticket.descripcion }}</p>
+          <span>{{ ticket.prioridad }} · {{ ticket.asignadoA }}</span>
+        </div>
+      </div>
+
+      <div class="kanban-column">
+        <div class="kanban-title">Finalizado</div>
+        <div class="kanban-ticket" *ngFor="let ticket of ticketsFinalizados">
+          <h4>{{ ticket.titulo }}</h4>
+          <p>{{ ticket.descripcion }}</p>
+          <span>{{ ticket.prioridad }} · {{ ticket.asignadoA }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- MODAL GROUP -->
+  <p-dialog
+    header="Group"
+    [(visible)]="dialogVisible"
+    [modal]="true"
+    [style]="{ width: '400px' }">
+
+    <div class="p-fluid modal-form">
+      <input pInputText [(ngModel)]="currentGroup.nombre" placeholder="Nombre" />
+      <input pInputText [(ngModel)]="currentGroup.nivel" placeholder="Nivel" />
+      <input pInputText [(ngModel)]="currentGroup.autor" placeholder="Autor" />
+      <input pInputText [(ngModel)]="currentGroup.descripcion" placeholder="Descripción" />
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        label="Cancelar"
+        class="p-button-text"
+        (click)="dialogVisible = false">
+      </button>
+
+      <button
+        pButton
+        label="Guardar"
+        (click)="saveGroup()">
+      </button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- MODAL MEMBER -->
+  <p-dialog
+    header="Miembro"
+    [(visible)]="memberDialogVisible"
+    [modal]="true"
+    [style]="{ width: '400px' }">
+
+    <div class="p-fluid modal-form">
+      <input pInputText [(ngModel)]="currentMember.nombre" placeholder="Nombre" />
+      <input pInputText [(ngModel)]="currentMember.email" placeholder="Email" />
+      <input pInputText [(ngModel)]="currentMember.rol" placeholder="Rol" />
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        label="Cancelar"
+        class="p-button-text"
+        (click)="memberDialogVisible = false">
+      </button>
+
+      <button
+        pButton
+        label="Guardar"
+        (click)="saveMember()">
+      </button>
+    </ng-template>
+  </p-dialog>
+
+  <!-- MODAL TICKET -->
+  <p-dialog
+    header="Ticket"
+    [(visible)]="ticketDialogVisible"
+    [modal]="true"
+    [style]="{ width: '500px' }">
+
+    <div class="p-fluid modal-form">
+      <input pInputText [(ngModel)]="currentTicket.titulo" placeholder="Título" />
+      <input pInputText [(ngModel)]="currentTicket.descripcion" placeholder="Descripción" />
+      <input pInputText [(ngModel)]="currentTicket.estado" placeholder="Estado" />
+      <input pInputText [(ngModel)]="currentTicket.prioridad" placeholder="Prioridad" />
+      <input pInputText [(ngModel)]="currentTicket.asignadoA" placeholder="Asignado a" />
+      <input pInputText type="date" [(ngModel)]="currentTicket.fechaCreacion" placeholder="Fecha creación" />
+      <input pInputText type="date" [(ngModel)]="currentTicket.fechaLimite" placeholder="Fecha límite" />
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        label="Cancelar"
+        class="p-button-text"
+        (click)="ticketDialogVisible = false">
+      </button>
+
+      <button
+        pButton
+        label="Guardar"
+        (click)="saveTicket()">
+      </button>
+    </ng-template>
+  </p-dialog>
+
+</div>
