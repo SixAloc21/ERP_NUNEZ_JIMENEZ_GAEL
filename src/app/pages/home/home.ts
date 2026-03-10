@@ -30,7 +30,6 @@ export class HomeComponent implements OnInit {
   grupoActual = {
     nombre: 'Equipo Dev',
     descripcion: 'Espacio de trabajo para gestión de tickets y seguimiento del proyecto.',
-    modelo: 'GPT-4o mini'
   };
 
   resumen = {
