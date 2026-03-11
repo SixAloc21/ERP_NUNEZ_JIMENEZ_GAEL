@@ -11,32 +11,11 @@
         <span class="meta-pill">
           Usuario: <b>{{ user }}</b>
         </span>
+
+        <span class="meta-pill llm-pill">
+          Modelo: <b>{{ grupoActual.modelo }}</b>
+        </span>
       </div>
-    </div>
-
-    <div class="hero-actions">
-      <p-button
-        label="Ver grupos"
-        icon="pi pi-users"
-        severity="contrast"
-        *ngIf="permissionService.has('group:view')"
-        (onClick)="goToGroups()">
-      </p-button>
-
-      <p-button
-        label="Ver usuarios"
-        icon="pi pi-user"
-        severity="info"
-        *ngIf="permissionService.has('user:view')"
-        (onClick)="goToUsers()">
-      </p-button>
-
-      <p-button
-        label="Cerrar sesión"
-        icon="pi pi-sign-out"
-        severity="danger"
-        (onClick)="logout()">
-      </p-button>
     </div>
   </section>
 
@@ -74,11 +53,48 @@
 
   <section class="content-grid">
     <p-card header="Tickets recientes" class="panel-card">
+      <div class="quick-filters">
+        <button
+          class="filter-btn"
+          [class.active]="filtroActivo === 'mis'"
+          (click)="aplicarFiltro('mis')">
+          Mis tickets
+        </button>
+
+        <button
+          class="filter-btn"
+          [class.active]="filtroActivo === 'sinAsignar'"
+          (click)="aplicarFiltro('sinAsignar')">
+          Sin asignar
+        </button>
+
+        <button
+          class="filter-btn"
+          [class.active]="filtroActivo === 'alta'"
+          (click)="aplicarFiltro('alta')">
+          Prioridad alta
+        </button>
+
+        <button
+          class="filter-btn clear"
+          [class.active]="filtroActivo === 'todos'"
+          (click)="aplicarFiltro('todos')">
+          Limpiar
+        </button>
+      </div>
+
+      <div class="filter-status">
+        Filtro activo: <b>{{ getTextoFiltroActivo() }}</b>
+      </div>
+
       <div class="ticket-list">
-        <div class="ticket-item" *ngFor="let ticket of ticketsRecientes">
+        <div class="ticket-item" *ngFor="let ticket of ticketsFiltrados">
           <div class="ticket-main">
             <h3>{{ ticket.titulo }}</h3>
-            <p>Asignado a: <b>{{ ticket.asignado }}</b></p>
+            <p>
+              Asignado a:
+              <b>{{ ticket.asignado && ticket.asignado.trim() !== '' ? ticket.asignado : 'Sin asignar' }}</b>
+            </p>
             <small>Fecha: {{ ticket.fecha }}</small>
           </div>
 
@@ -94,6 +110,10 @@
             </p-tag>
           </div>
         </div>
+
+        <div class="empty-state" *ngIf="ticketsFiltrados.length === 0">
+          No hay tickets para este filtro.
+        </div>
       </div>
     </p-card>
 
@@ -107,24 +127,15 @@
         </p-button>
 
         <p-button
-          label="Editar usuario"
-          icon="pi pi-pencil"
-          severity="warn"
-          *ngIf="permissionService.has('user:edit')">
-        </p-button>
-
-        <p-button
-          label="Ver grupos"
-          icon="pi pi-users"
-          severity="help"
-          *ngIf="permissionService.has('group:view')"
-          (onClick)="goToGroups()">
-        </p-button>
-
-        <p-button
           label="Crear ticket"
           icon="pi pi-plus"
           severity="primary">
+        </p-button>
+
+        <p-button
+          label="Mi perfil"
+          icon="pi pi-user"
+          severity="contrast">
         </p-button>
       </div>
     </p-card>

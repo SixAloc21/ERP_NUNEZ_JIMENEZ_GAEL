@@ -1,34 +1,266 @@
-<h1>User</h1>
+<div class="user-page" *ngIf="auth.hasPermission('ver_usuarios')">
+  <div class="page-header">
+    <div>
+      <h1>
+        <i class="pi pi-users title-icon"></i>
+        Gestión de usuarios
+      </h1>
+      <p>Administra usuarios y permisos del sistema</p>
+    </div>
 
-<p-card header="Profile Data">
-  <div class="profile-grid">
-    <div><b>Usuario:</b> {{ perfil.usuario }}</div>
-    <div><b>Email:</b> {{ perfil.email }}</div>
-    <div><b>Nombre completo:</b> {{ perfil.nombreCompleto }}</div>
-    <div><b>Dirección:</b> {{ perfil.direccion }}</div>
-    <div><b>Teléfono:</b> {{ perfil.telefono }}</div>
-    <div><b>Fecha de nacimiento:</b> {{ perfil.fechaNacimiento }}</div>
+    <div class="header-actions">
+      <div class="logged-chip">
+        <i class="pi pi-shield"></i>
+        Sesión actual: <strong>{{ loggedUser }}</strong>
+      </div>
+
+      <button
+        *ngIf="auth.hasPermission('crear_usuarios')"
+        pButton
+        type="button"
+        label="Agregar usuario"
+        icon="pi pi-user-plus"
+        class="add-user-btn"
+        (click)="openNewUser()">
+      </button>
+    </div>
   </div>
 
-  <div class="actions">
-    <button pButton label="Editar" icon="pi pi-pencil" (click)="abrirEditar()"></button>
-    <button pButton label="Eliminar" icon="pi pi-trash" severity="danger" (click)="eliminarPerfil()"></button>
-  </div>
-</p-card>
+  <p-card class="panel-card">
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div class="card-title-wrap">
+          <h3><i class="pi pi-id-card"></i> Usuarios registrados</h3>
+          <span class="header-chip">
+            <i class="pi pi-users"></i>
+            {{ users.length }} usuarios
+          </span>
+        </div>
+      </div>
+    </ng-template>
 
-<!-- ✅ MODAL UPDATE -->
-<p-dialog header="Editar Perfil" [(visible)]="modalVisible" [modal]="true" [style]="{width:'420px'}">
-  <div class="p-fluid form">
-    <input pInputText [(ngModel)]="editPerfil.usuario" placeholder="Usuario" />
-    <input pInputText [(ngModel)]="editPerfil.email" placeholder="Email" />
-    <input pInputText [(ngModel)]="editPerfil.nombreCompleto" placeholder="Nombre completo" />
-    <input pInputText [(ngModel)]="editPerfil.direccion" placeholder="Dirección" />
-    <input pInputText [(ngModel)]="editPerfil.telefono" placeholder="Teléfono" />
-    <input pInputText [(ngModel)]="editPerfil.fechaNacimiento" placeholder="Fecha de nacimiento" />
-  </div>
+    <p-table [value]="users" class="custom-table">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Usuario</th>
+          <th>Email</th>
+          <th>Nombre completo</th>
+          <th>Teléfono</th>
+          <th>Rol</th>
+          <th>Permisos</th>
+          <th class="actions-col">Acciones</th>
+        </tr>
+      </ng-template>
 
-  <ng-template pTemplate="footer">
-    <button pButton label="Cancelar" class="p-button-text" (click)="modalVisible=false"></button>
-    <button pButton label="Guardar" icon="pi pi-check" (click)="guardarCambios()"></button>
-  </ng-template>
-</p-dialog>
+      <ng-template pTemplate="body" let-user>
+        <tr>
+          <td>
+            <div class="user-name-cell">
+              <div class="user-avatar">
+                {{ user.usuario.charAt(0) }}
+              </div>
+              <div class="user-main-info">
+                <strong>{{ user.usuario }}</strong>
+                <small>ID: {{ user.id }}</small>
+              </div>
+            </div>
+          </td>
+
+          <td>{{ user.email }}</td>
+          <td>{{ user.nombreCompleto }}</td>
+          <td>{{ user.telefono }}</td>
+
+          <td>
+            <span class="table-badge" [class.superadmin-badge]="user.rol === 'SuperAdmin'">
+              <i class="pi" [ngClass]="user.rol === 'SuperAdmin' ? 'pi-shield' : 'pi-user'"></i>
+              {{ user.rol }}
+            </span>
+          </td>
+
+          <td>
+            <div class="permission-preview">
+              <span class="permission-pill" *ngFor="let permiso of user.permisos.slice(0, 2)">
+                <i class="pi" [ngClass]="getPermissionIcon(permiso)"></i>
+                {{ getPermissionLabel(permiso) }}
+              </span>
+
+              <span class="permission-more" *ngIf="user.permisos.length > 2">
+                +{{ user.permisos.length - 2 }}
+              </span>
+            </div>
+          </td>
+
+          <td class="action-buttons">
+            <button
+              *ngIf="auth.hasPermission('gestionar_permisos')"
+              pButton
+              type="button"
+              icon="pi pi-key"
+              class="crud-btn crud-btn-permission"
+              pTooltip="Gestionar permisos"
+              tooltipPosition="top"
+              (click)="openPermissions(user)">
+            </button>
+
+            <button
+              *ngIf="auth.hasPermission('editar_usuarios')"
+              pButton
+              type="button"
+              icon="pi pi-pencil"
+              class="crud-btn crud-btn-edit"
+              pTooltip="Editar usuario"
+              tooltipPosition="top"
+              (click)="editUser(user)">
+            </button>
+
+            <button
+              *ngIf="auth.hasPermission('eliminar_usuarios') && user.usuario !== loggedUser"
+              pButton
+              type="button"
+              icon="pi pi-trash"
+              class="crud-btn crud-btn-delete"
+              pTooltip="Eliminar usuario"
+              tooltipPosition="top"
+              (click)="deleteUser(user)">
+            </button>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+
+  <p-dialog
+    [header]="currentEditUser.id === 0 ? 'Nuevo usuario' : 'Editar usuario'"
+    [(visible)]="userDialogVisible"
+    [modal]="true"
+    [style]="{ width: '520px' }">
+
+    <div class="form-grid">
+      <div class="input-group">
+        <label><i class="pi pi-user"></i> Usuario</label>
+        <input pInputText [(ngModel)]="currentEditUser.usuario" placeholder="Usuario" />
+      </div>
+
+      <div class="input-group">
+        <label><i class="pi pi-envelope"></i> Email</label>
+        <input pInputText [(ngModel)]="currentEditUser.email" placeholder="Email" />
+      </div>
+
+      <div class="input-group">
+        <label><i class="pi pi-id-card"></i> Nombre completo</label>
+        <input pInputText [(ngModel)]="currentEditUser.nombreCompleto" placeholder="Nombre completo" />
+      </div>
+
+      <div class="input-group">
+        <label><i class="pi pi-home"></i> Dirección</label>
+        <input pInputText [(ngModel)]="currentEditUser.direccion" placeholder="Dirección" />
+      </div>
+
+      <div class="input-group">
+        <label><i class="pi pi-phone"></i> Teléfono</label>
+        <input pInputText [(ngModel)]="currentEditUser.telefono" placeholder="Teléfono" />
+      </div>
+
+      <div class="input-group">
+        <label><i class="pi pi-briefcase"></i> Rol</label>
+        <input pInputText [(ngModel)]="currentEditUser.rol" placeholder="Rol" />
+      </div>
+
+      <div class="input-group">
+        <label><i class="pi pi-calendar"></i> Fecha de nacimiento</label>
+        <input pInputText type="date" [(ngModel)]="currentEditUser.fechaNacimiento" />
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        type="button"
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="userDialogVisible = false">
+      </button>
+
+      <button
+        pButton
+        type="button"
+        [label]="currentEditUser.id === 0 ? 'Crear usuario' : 'Guardar cambios'"
+        icon="pi pi-save"
+        (click)="saveUser()">
+      </button>
+    </ng-template>
+  </p-dialog>
+
+  <p-dialog
+    header="Gestión de permisos"
+    [(visible)]="permissionsDialogVisible"
+    [modal]="true"
+    [style]="{ width: '560px' }">
+
+    <div class="permissions-modal">
+      <div class="permission-user-box">
+        <h4>
+          <i class="pi pi-user"></i>
+          {{ currentPermissionUser.usuario }}
+        </h4>
+        <p>{{ currentPermissionUser.nombreCompleto }}</p>
+      </div>
+
+      <div class="permissions-list">
+        <div
+          class="permission-row"
+          *ngFor="let permission of availablePermissions"
+          (click)="togglePermission(permission)">
+
+          <div class="permission-row-text">
+            <strong>
+              <i class="pi" [ngClass]="getPermissionIcon(permission)"></i>
+              {{ getPermissionLabel(permission) }}
+            </strong>
+            <small>{{ permission }}</small>
+          </div>
+
+          <button
+            pButton
+            type="button"
+            [icon]="hasPermission(permission) ? 'pi pi-minus' : 'pi pi-plus'"
+            [label]="hasPermission(permission) ? 'Quitar' : 'Agregar'"
+            [severity]="hasPermission(permission) ? 'danger' : 'success'">
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        type="button"
+        label="Cancelar"
+        icon="pi pi-times"
+        class="p-button-text"
+        (click)="permissionsDialogVisible = false">
+      </button>
+
+      <button
+        pButton
+        type="button"
+        label="Guardar permisos"
+        icon="pi pi-save"
+        (click)="savePermissions()">
+      </button>
+    </ng-template>
+  </p-dialog>
+</div>
+
+<div class="user-page" *ngIf="!auth.hasPermission('ver_usuarios')">
+  <p-card class="panel-card">
+    <div class="no-access-box">
+      <div class="no-access-icon">
+        <i class="pi pi-lock"></i>
+      </div>
+      <h3>Sin acceso</h3>
+      <p>No tienes permisos para visualizar la gestión de usuarios.</p>
+    </div>
+  </p-card>
+</div>

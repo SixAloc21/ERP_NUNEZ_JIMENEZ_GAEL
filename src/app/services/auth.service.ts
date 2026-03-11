@@ -1,34 +1,51 @@
 import { Injectable } from '@angular/core';
-import { UserState, initialUserState } from '../state/user.state';
 
-@Injectable({ providedIn: 'root' })
+@Injectable({
+  providedIn: 'root'
+})
 export class AuthService {
+  loggedUser = '';
+  users: any[] = [];
 
-  private user: UserState = { ...initialUserState };
-
-  // ✅ Simulación de login (luego se reemplaza por HTTP)
-  loginMock() {
-    this.user = {
-      name: 'Gael',
-      permissions: [
-        'user:view',
-        'user:edit',
-        'group:view',
-        'ticket:view'
-      ]
-    };
-    return this.user;
+  constructor() {
+    const savedUser = localStorage.getItem('loggedUser');
+    this.loggedUser = savedUser || '';
   }
 
-  getUser(): UserState {
-    return this.user;
+  setUsers(users: any[]) {
+    this.users = users;
   }
 
-  setUser(user: UserState) {
-    this.user = user;
+  getCurrentUser() {
+    return this.users.find(u => u.usuario === this.loggedUser);
+  }
+
+  getUser() {
+    return this.getCurrentUser();
+  }
+
+  login(userName: string) {
+    this.loggedUser = userName;
+    localStorage.setItem('loggedUser', userName);
   }
 
   logout() {
-    this.user = { ...initialUserState };
+    this.loggedUser = '';
+    localStorage.removeItem('loggedUser');
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.loggedUser;
+  }
+
+  isSuperAdmin(): boolean {
+    return this.getCurrentUser()?.rol === 'SuperAdmin';
+  }
+
+  hasPermission(permission: string): boolean {
+    if (this.isSuperAdmin()) return true;
+
+    const user = this.getCurrentUser();
+    return user?.permisos?.includes(permission);
   }
 }

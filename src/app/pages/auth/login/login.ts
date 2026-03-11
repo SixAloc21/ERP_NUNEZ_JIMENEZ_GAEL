@@ -28,13 +28,15 @@ import { MessageService } from 'primeng/api';
   styleUrls: ['./login.css'],
 })
 export class LoginComponent {
-  // campos
+
   usuario = '';
   password = '';
 
-  // ✅ credenciales hardcodeadas (puedes cambiarlas)
-  private readonly HARD_USER = 'Gael';
-  private readonly HARD_PASS = 'Gael!2004##'; // 10+ y símbolos
+  // 👇 usuarios simulados del sistema
+  private readonly USERS = [
+    { user: 'Gael', pass: 'Gael!2004##' }, // SuperAdmin
+    { user: 'Ana', pass: 'Ana!2004##' }    // Usuario normal
+  ];
 
   constructor(private router: Router, private msg: MessageService) {}
 
@@ -43,6 +45,7 @@ export class LoginComponent {
   }
 
   login() {
+
     if (!this.canLogin) {
       this.msg.add({
         severity: 'warn',
@@ -52,11 +55,11 @@ export class LoginComponent {
       return;
     }
 
-    const ok =
-      this.usuario.trim() === this.HARD_USER &&
-      this.password === this.HARD_PASS;
+    const foundUser = this.USERS.find(
+      u => u.user === this.usuario.trim() && u.pass === this.password
+    );
 
-    if (!ok) {
+    if (!foundUser) {
       this.msg.add({
         severity: 'error',
         summary: 'Credenciales incorrectas',
@@ -65,14 +68,14 @@ export class LoginComponent {
       return;
     }
 
-    // ✅ simular sesión
+    // ✅ crear sesión
     localStorage.setItem('token', 'demo-token');
-    localStorage.setItem('loggedUser', this.usuario.trim());
+    localStorage.setItem('loggedUser', foundUser.user);
 
     this.msg.add({
       severity: 'success',
       summary: 'Login exitoso',
-      detail: 'Bienvenido',
+      detail: `Bienvenido ${foundUser.user}`,
     });
 
     setTimeout(() => this.router.navigate(['/home']), 400);

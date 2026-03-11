@@ -17,6 +17,14 @@ interface TicketResumen {
   fecha: string;
 }
 
+interface GrupoActual {
+  nombre: string;
+  descripcion: string;
+  modelo: string;
+}
+
+type FiltroRapido = 'todos' | 'mis' | 'sinAsignar' | 'alta';
+
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -25,11 +33,12 @@ interface TicketResumen {
   styleUrls: ['./home.css'],
 })
 export class HomeComponent implements OnInit {
-  user = localStorage.getItem('loggedUser') || 'usuario';
+  user = 'usuario';
 
-  grupoActual = {
+  grupoActual: GrupoActual = {
     nombre: 'Equipo Dev',
     descripcion: 'Espacio de trabajo para gestión de tickets y seguimiento del proyecto.',
+    modelo: 'GPT-4o mini'
   };
 
   resumen = {
@@ -72,6 +81,9 @@ export class HomeComponent implements OnInit {
     }
   ];
 
+  ticketsFiltrados: TicketResumen[] = [];
+  filtroActivo: FiltroRapido = 'todos';
+
   constructor(
     private router: Router,
     private authService: AuthService,
@@ -79,21 +91,75 @@ export class HomeComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.authService.loginMock();
+    if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem('loggedUser');
+      if (savedUser) {
+        this.user = savedUser;
+      }
+
+      const savedGroup = localStorage.getItem('currentGroup');
+      if (savedGroup) {
+        const grupo = JSON.parse(savedGroup);
+        this.grupoActual = {
+          nombre: grupo.nombre || 'Equipo Dev',
+          descripcion: grupo.descripcion || 'Espacio de trabajo activo.',
+          modelo: grupo.modelo || 'GPT-4o mini'
+        };
+      }
+    }
+
+    this.ticketsFiltrados = [...this.ticketsRecientes];
   }
 
   logout(): void {
-    localStorage.removeItem('token');
-    localStorage.removeItem('loggedUser');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('token');
+      localStorage.removeItem('loggedUser');
+      localStorage.removeItem('currentGroup');
+    }
     this.router.navigate(['/auth/login']);
   }
 
-  goToGroups(): void {
-    this.router.navigate(['/group']);
+  aplicarFiltro(tipo: FiltroRapido): void {
+    this.filtroActivo = tipo;
+
+    switch (tipo) {
+      case 'mis':
+        this.ticketsFiltrados = this.ticketsRecientes.filter(
+          ticket => ticket.asignado?.toLowerCase() === this.user.toLowerCase()
+        );
+        break;
+
+      case 'sinAsignar':
+        this.ticketsFiltrados = this.ticketsRecientes.filter(
+          ticket => !ticket.asignado || ticket.asignado.trim() === ''
+        );
+        break;
+
+      case 'alta':
+        this.ticketsFiltrados = this.ticketsRecientes.filter(
+          ticket => ticket.prioridad === 'Alta'
+        );
+        break;
+
+      case 'todos':
+      default:
+        this.ticketsFiltrados = [...this.ticketsRecientes];
+        break;
+    }
   }
 
-  goToUsers(): void {
-    this.router.navigate(['/user']);
+  getTextoFiltroActivo(): string {
+    switch (this.filtroActivo) {
+      case 'mis':
+        return 'Mis tickets';
+      case 'sinAsignar':
+        return 'Tickets sin asignar';
+      case 'alta':
+        return 'Tickets con prioridad alta';
+      default:
+        return 'Todos';
+    }
   }
 
   getEstadoSeverity(

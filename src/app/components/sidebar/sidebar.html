@@ -2,20 +2,22 @@
   <!-- Brand -->
   <div class="brand">
     <div class="logo">A</div>
+
     <div class="brand-txt">
-      <div class="title">Proyecto</div>
-      <div class="sub">Dashboard</div>
+      <div class="title">Proyecto ERP</div>
+      <div class="sub">Workspace activo</div>
     </div>
   </div>
 
   <!-- User -->
-  <div class="user">
-    <div class="avatar">{{ usuario.charAt(0) }}</div>
-    <div class="user-txt">
-      <div class="name">{{ usuario }}</div>
-      <div class="role">Usuario</div>
-    </div>
+ <div class="user clickable-user" (click)="goToProfile()">
+  <div class="avatar">{{ usuario.charAt(0) }}</div>
+
+  <div class="user-txt">
+    <div class="name">{{ usuario }}</div>
+    <div class="role">Usuario activo</div>
   </div>
+</div>
 
   <!-- Menu -->
   <nav class="menu">
@@ -23,29 +25,19 @@
 
     <a routerLink="/home" routerLinkActive="active" class="item">
       <span class="dot"></span>
-      <span>Home</span>
+      <span>Dashboard</span>
     </a>
 
-    <a
-      routerLink="/"
-      routerLinkActive="active"
-      [routerLinkActiveOptions]="{ exact: true }"
-      class="item"
-    >
-      <span class="dot"></span>
-      <span>Landing</span>
-    </a>
-
-    <div class="section">Pages</div>
+    <div class="section">Gestión</div>
 
     <a routerLink="/group" routerLinkActive="active" class="item">
       <span class="dot"></span>
-      <span>Group</span>
+      <span>Grupos</span>
     </a>
 
     <a routerLink="/user" routerLinkActive="active" class="item">
       <span class="dot"></span>
-      <span>User</span>
+      <span>Usuarios</span>
     </a>
 
     <div class="section">Módulos</div>

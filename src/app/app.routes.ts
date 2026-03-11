@@ -1,6 +1,14 @@
 import { Routes } from '@angular/router';
 
 export const routes: Routes = [
+  /* ============================
+     🌐 PÚBLICO (SIN SIDEBAR)
+  ============================ */
+  {
+    path: '',
+    loadComponent: () =>
+      import('./pages/landing/landing').then(m => m.LandingComponent),
+  },
 
   /* ============================
      🔐 AUTH (SIN SIDEBAR)
@@ -11,14 +19,12 @@ export const routes: Routes = [
       {
         path: 'login',
         loadComponent: () =>
-          import('./pages/auth/login/login')
-            .then(m => m.LoginComponent),
+          import('./pages/auth/login/login').then(m => m.LoginComponent),
       },
       {
         path: 'register',
         loadComponent: () =>
-          import('./pages/auth/register/register')
-            .then(m => m.RegisterComponent),
+          import('./pages/auth/register/register').then(m => m.RegisterComponent),
       },
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],
@@ -30,43 +36,29 @@ export const routes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('./layout/main-layout/main-layout')
-        .then(m => m.MainLayoutComponent),
-
+      import('./layout/main-layout/main-layout').then(m => m.MainLayoutComponent),
     children: [
-
-      // Landing
-      {
-        path: '',
-        loadComponent: () =>
-          import('./pages/landing/landing')
-            .then(m => m.LandingComponent),
-      },
-
-      // Home
       {
         path: 'home',
         loadComponent: () =>
-          import('./pages/home/home')
-            .then(m => m.HomeComponent),
+          import('./pages/home/home').then(m => m.HomeComponent),
       },
-
-      // Group
       {
         path: 'group',
         loadComponent: () =>
-          import('./pages/group/group')
-            .then(m => m.GroupComponent),
+          import('./pages/group/group').then(m => m.GroupComponent),
       },
-
-      // User
       {
         path: 'user',
         loadComponent: () =>
-          import('./pages/user/user')
-            .then(m => m.UserComponent),
+          import('./pages/user/user').then(m => m.UserComponent),
       },
 
+      {
+        path: 'profile',
+        loadComponent: () =>
+          import('./pages/profile/profile').then(m => m.ProfileComponent),
+      },
     ],
   },
 
@@ -74,5 +66,4 @@ export const routes: Routes = [
      🚫 404
   ============================ */
   { path: '**', redirectTo: '' },
-
 ];

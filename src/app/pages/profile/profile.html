@@ -1,0 +1,137 @@
+<div class="profile-page">
+  <div class="page-header">
+    <div>
+      <h1>Mi perfil</h1>
+      <p>Información del usuario actual y carga de trabajo</p>
+    </div>
+  </div>
+
+  <p-card header="Perfil de Usuario" class="panel-card">
+    <div class="profile-top">
+      <div class="avatar-lg">
+        {{ currentUser.usuario.charAt(0) }}
+      </div>
+
+      <div>
+        <h2>{{ currentUser.nombreCompleto }}</h2>
+        <p class="muted">{{ currentUser.rol }}</p>
+      </div>
+    </div>
+
+    <div class="profile-grid">
+      <div class="profile-item">
+        <span class="label">Usuario</span>
+        <p>{{ currentUser.usuario }}</p>
+      </div>
+
+      <div class="profile-item">
+        <span class="label">Email</span>
+        <p>{{ currentUser.email }}</p>
+      </div>
+
+      <div class="profile-item">
+        <span class="label">Nombre completo</span>
+        <p>{{ currentUser.nombreCompleto }}</p>
+      </div>
+
+      <div class="profile-item">
+        <span class="label">Dirección</span>
+        <p>{{ currentUser.direccion }}</p>
+      </div>
+
+      <div class="profile-item">
+        <span class="label">Teléfono</span>
+        <p>{{ currentUser.telefono }}</p>
+      </div>
+
+      <div class="profile-item">
+        <span class="label">Fecha de nacimiento</span>
+        <p>{{ currentUser.fechaNacimiento }}</p>
+      </div>
+    </div>
+
+    <div class="profile-actions">
+      <button
+        pButton
+        type="button"
+        label="Editar perfil"
+        icon="pi pi-pencil"
+        (click)="openEditProfile()">
+      </button>
+    </div>
+  </p-card>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <span>Abiertos</span>
+      <h3>{{ abiertos }}</h3>
+    </div>
+
+    <div class="summary-card">
+      <span>En progreso</span>
+      <h3>{{ enProgreso }}</h3>
+    </div>
+
+    <div class="summary-card">
+      <span>Hechos</span>
+      <h3>{{ hechos }}</h3>
+    </div>
+  </div>
+
+  <p-card header="Tickets asignados" class="panel-card">
+    <div class="ticket-list" *ngIf="assignedTickets.length; else noTickets">
+      <div class="ticket-item" *ngFor="let ticket of assignedTickets">
+        <div class="ticket-main">
+          <h4>{{ ticket.titulo }}</h4>
+          <p>Fecha límite: {{ ticket.fechaLimite }}</p>
+        </div>
+
+        <div class="ticket-tags">
+          <span class="tag" [ngClass]="getEstadoClass(ticket.estado)">
+            {{ ticket.estado }}
+          </span>
+
+          <span class="tag" [ngClass]="getPrioridadClass(ticket.prioridad)">
+            {{ ticket.prioridad }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <ng-template #noTickets>
+      <p class="empty-text">No hay tickets asignados a este usuario.</p>
+    </ng-template>
+  </p-card>
+
+  <p-dialog
+    header="Editar perfil"
+    [(visible)]="profileDialogVisible"
+    [modal]="true"
+    [style]="{ width: '520px' }">
+
+    <div class="form-grid">
+      <input pInputText [(ngModel)]="currentEditUser.usuario" placeholder="Usuario" />
+      <input pInputText [(ngModel)]="currentEditUser.email" placeholder="Email" />
+      <input pInputText [(ngModel)]="currentEditUser.nombreCompleto" placeholder="Nombre completo" />
+      <input pInputText [(ngModel)]="currentEditUser.direccion" placeholder="Dirección" />
+      <input pInputText [(ngModel)]="currentEditUser.telefono" placeholder="Teléfono" />
+      <input pInputText [(ngModel)]="currentEditUser.rol" placeholder="Rol" />
+      <input pInputText type="date" [(ngModel)]="currentEditUser.fechaNacimiento" />
+    </div>
+
+    <ng-template pTemplate="footer">
+      <button
+        pButton
+        label="Cancelar"
+        class="p-button-text"
+        (click)="profileDialogVisible = false">
+      </button>
+
+      <button
+        pButton
+        label="Guardar cambios"
+        (click)="saveProfile()">
+      </button>
+    </ng-template>
+  </p-dialog>
+</div>
