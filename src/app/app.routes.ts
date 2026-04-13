@@ -1,18 +1,13 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './guards/auth-guard';
 
 export const routes: Routes = [
-  /* ============================
-     🌐 PÚBLICO (SIN SIDEBAR)
-  ============================ */
   {
     path: '',
     loadComponent: () =>
       import('./pages/landing/landing').then(m => m.LandingComponent),
   },
 
-  /* ============================
-     🔐 AUTH (SIN SIDEBAR)
-  ============================ */
   {
     path: 'auth',
     children: [
@@ -30,13 +25,11 @@ export const routes: Routes = [
     ],
   },
 
-  /* ============================
-     🏠 APP (CON SIDEBAR)
-  ============================ */
   {
     path: '',
     loadComponent: () =>
       import('./layout/main-layout/main-layout').then(m => m.MainLayoutComponent),
+    canActivate: [authGuard],
     children: [
       {
         path: 'home',
@@ -53,7 +46,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./pages/user/user').then(m => m.UserComponent),
       },
-
       {
         path: 'profile',
         loadComponent: () =>
@@ -62,8 +54,5 @@ export const routes: Routes = [
     ],
   },
 
-  /* ============================
-     🚫 404
-  ============================ */
   { path: '**', redirectTo: '' },
 ];

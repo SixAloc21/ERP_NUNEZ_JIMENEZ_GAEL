@@ -3,19 +3,27 @@
     <div class="hero-text">
       <p class="eyebrow">Dashboard del grupo</p>
       <h1>{{ grupoActual.nombre }}</h1>
-      <p class="desc">
-        {{ grupoActual.descripcion }}
-      </p>
+      <p class="desc">{{ grupoActual.descripcion }}</p>
 
       <div class="hero-meta">
         <span class="meta-pill">
           Usuario: <b>{{ user }}</b>
         </span>
 
-        <span class="meta-pill llm-pill">
-          Modelo: <b>{{ grupoActual.modelo }}</b>
+        <span class="meta-pill">
+          Integrantes: <b>{{ grupoActual.integrantes }}</b>
+        </span>
+
+        <span class="meta-pill">
+          Tickets del grupo: <b>{{ resumen.total }}</b>
         </span>
       </div>
+    </div>
+
+    <div class="hero-context-card">
+      <span>Workspace activo</span>
+      <strong>{{ grupoActual.nombre }}</strong>
+      <small>Selecciona otro grupo desde el panel de workspaces.</small>
     </div>
   </section>
 
@@ -45,99 +53,161 @@
       <h2>{{ resumen.hechos }}</h2>
     </div>
 
-    <div class="stat-card blocked">
-      <span>Bloqueados</span>
-      <h2>{{ resumen.bloqueados }}</h2>
+    <div class="stat-card high">
+      <span>Alta prioridad</span>
+      <h2>{{ resumen.alta }}</h2>
     </div>
+  </section>
+
+  <section class="charts-grid">
+    <p-card header="Tickets por estado" class="panel-card chart-card">
+      <div class="chart-shell">
+        <p-chart
+          type="doughnut"
+          [data]="statusChartData"
+          [options]="doughnutChartOptions">
+        </p-chart>
+      </div>
+    </p-card>
+
+    <p-card header="Tickets por prioridad" class="panel-card chart-card">
+      <div class="chart-shell">
+        <p-chart
+          type="bar"
+          [data]="priorityChartData"
+          [options]="barChartOptions">
+        </p-chart>
+      </div>
+    </p-card>
+
+    <p-card header="Tickets por grupo" class="panel-card chart-card">
+      <div class="chart-shell">
+        <p-chart
+          type="bar"
+          [data]="groupChartData"
+          [options]="barChartOptions">
+        </p-chart>
+      </div>
+    </p-card>
   </section>
 
   <section class="content-grid">
     <p-card header="Tickets recientes" class="panel-card">
       <div class="quick-filters">
-        <button
-          class="filter-btn"
-          [class.active]="filtroActivo === 'mis'"
-          (click)="aplicarFiltro('mis')">
+        <button class="filter-btn" [class.active]="filtroActivo === 'mis'" (click)="aplicarFiltro('mis')">
           Mis tickets
         </button>
 
-        <button
-          class="filter-btn"
-          [class.active]="filtroActivo === 'sinAsignar'"
-          (click)="aplicarFiltro('sinAsignar')">
+        <button class="filter-btn" [class.active]="filtroActivo === 'sinAsignar'" (click)="aplicarFiltro('sinAsignar')">
           Sin asignar
         </button>
 
-        <button
-          class="filter-btn"
-          [class.active]="filtroActivo === 'alta'"
-          (click)="aplicarFiltro('alta')">
+        <button class="filter-btn" [class.active]="filtroActivo === 'alta'" (click)="aplicarFiltro('alta')">
           Prioridad alta
         </button>
 
-        <button
-          class="filter-btn clear"
-          [class.active]="filtroActivo === 'todos'"
-          (click)="aplicarFiltro('todos')">
+        <button class="filter-btn clear" [class.active]="filtroActivo === 'todos'" (click)="aplicarFiltro('todos')">
           Limpiar
         </button>
       </div>
 
       <div class="filter-status">
         Filtro activo: <b>{{ getTextoFiltroActivo() }}</b>
+        <span *ngIf="loadingDashboard">Cargando dashboard...</span>
       </div>
 
-      <div class="ticket-list">
-        <div class="ticket-item" *ngFor="let ticket of ticketsFiltrados">
-          <div class="ticket-main">
-            <h3>{{ ticket.titulo }}</h3>
-            <p>
-              Asignado a:
-              <b>{{ ticket.asignado && ticket.asignado.trim() !== '' ? ticket.asignado : 'Sin asignar' }}</b>
-            </p>
-            <small>Fecha: {{ ticket.fecha }}</small>
-          </div>
+      <p-table
+        [value]="ticketsFiltrados"
+        [loading]="loadingDashboard"
+        styleClass="dashboard-table"
+        responsiveLayout="scroll">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Ticket</th>
+            <th>Asignado</th>
+            <th>Estado</th>
+            <th>Prioridad</th>
+            <th>Fecha</th>
+          </tr>
+        </ng-template>
 
-          <div class="ticket-tags">
-            <p-tag
-              [value]="ticket.estado"
-              [severity]="getEstadoSeverity(ticket.estado)">
-            </p-tag>
+        <ng-template pTemplate="body" let-ticket>
+          <tr>
+            <td>
+              <div class="ticket-title-cell">
+                <i class="pi pi-ticket"></i>
+                <strong>{{ ticket.titulo }}</strong>
+              </div>
+            </td>
+            <td>{{ ticket.asignado }}</td>
+            <td>
+              <p-tag [value]="ticket.estado" [severity]="getEstadoSeverity(ticket.estado)"></p-tag>
+            </td>
+            <td>
+              <p-tag [value]="ticket.prioridad" [severity]="getPrioridadSeverity(ticket.prioridad)"></p-tag>
+            </td>
+            <td>{{ ticket.fecha }}</td>
+          </tr>
+        </ng-template>
 
-            <p-tag
-              [value]="ticket.prioridad"
-              [severity]="getPrioridadSeverity(ticket.prioridad)">
-            </p-tag>
-          </div>
-        </div>
-
-        <div class="empty-state" *ngIf="ticketsFiltrados.length === 0">
-          No hay tickets para este filtro.
-        </div>
-      </div>
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">No hay tickets para este filtro.</div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
     </p-card>
 
-    <p-card header="Accesos rápidos" class="panel-card">
-      <div class="quick-actions">
-        <p-button
-          label="Ver tickets"
-          icon="pi pi-ticket"
-          severity="success"
-          *ngIf="permissionService.has('ticket:view')">
-        </p-button>
+    <div class="side-stack">
+      <p-card header="Grupos / workspaces" class="panel-card">
+        <div class="workspace-list" *ngIf="grupos.length; else noGroups">
+          <button
+            type="button"
+            class="workspace-item"
+            *ngFor="let grupo of grupos"
+            [class.active]="grupo.id === selectedGroupId"
+            (click)="onGroupChange(grupo.id)">
+            <span>
+              <strong>{{ grupo.nombre }}</strong>
+              <small>{{ grupo.integrantes }} integrantes</small>
+            </span>
+            <i class="pi pi-chevron-right"></i>
+          </button>
+        </div>
 
-        <p-button
-          label="Crear ticket"
-          icon="pi pi-plus"
-          severity="primary">
-        </p-button>
+        <ng-template #noGroups>
+          <p class="empty-state">No hay grupos disponibles.</p>
+        </ng-template>
+      </p-card>
 
-        <p-button
-          label="Mi perfil"
-          icon="pi pi-user"
-          severity="contrast">
-        </p-button>
-      </div>
-    </p-card>
+      <p-card header="Accesos rápidos" class="panel-card">
+        <div class="quick-actions">
+          <p-button
+            label="Ver tickets"
+            icon="pi pi-ticket"
+            severity="success"
+            *appHasPermission="'tickets:view'"
+            (onClick)="goToTickets()">
+          </p-button>
+
+          <p-button
+            label="Crear ticket"
+            icon="pi pi-plus"
+            severity="primary"
+            *appHasPermission="'tickets:add'"
+            (onClick)="goToTickets()">
+          </p-button>
+
+          <p-button
+            label="Mi perfil"
+            icon="pi pi-user"
+            severity="contrast"
+            (onClick)="goToProfile()">
+          </p-button>
+        </div>
+      </p-card>
+    </div>
   </section>
 </div>

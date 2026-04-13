@@ -10,6 +10,8 @@ import { ToastModule } from 'primeng/toast';
 import { MessageModule } from 'primeng/message';
 import { MessageService } from 'primeng/api';
 
+import { AuthService } from '../../../services/auth.service';
+
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -28,25 +30,30 @@ import { MessageService } from 'primeng/api';
   styleUrls: ['./login.css'],
 })
 export class LoginComponent {
-
   usuario = '';
   password = '';
+  loading = false;
+  private logoClickCount = 0;
 
-  // 👇 usuarios simulados del sistema
-  private readonly USERS = [
-    { user: 'Gael', pass: 'Gael!2004##' }, // SuperAdmin
-    { user: 'Ana', pass: 'Ana!2004##' }    // Usuario normal
-  ];
-
-  constructor(private router: Router, private msg: MessageService) {}
+  constructor(
+    private router: Router,
+    private msg: MessageService,
+    private authService: AuthService
+  ) {}
 
   get canLogin(): boolean {
-    return this.usuario.trim().length > 0 && this.password.trim().length > 0;
+    return (
+      this.usuario.trim().length > 0 &&
+      this.password.trim().length > 0 &&
+      !this.loading
+    );
   }
 
-  login() {
+  login(): void {
+    const user = this.usuario.trim().toLowerCase();
+    const password = this.password.trim();
 
-    if (!this.canLogin) {
+    if (!user || !password) {
       this.msg.add({
         severity: 'warn',
         summary: 'Campos vacíos',
@@ -55,29 +62,52 @@ export class LoginComponent {
       return;
     }
 
-    const foundUser = this.USERS.find(
-      u => u.user === this.usuario.trim() && u.pass === this.password
-    );
+    this.loading = true;
 
-    if (!foundUser) {
-      this.msg.add({
-        severity: 'error',
-        summary: 'Credenciales incorrectas',
-        detail: 'Usuario o contraseña inválidos',
-      });
+    this.authService.login({ user, password }).subscribe({
+      next: (response) => {
+        const loggedUsername =
+          response.data?.user?.username || response.data?.user?.email || user;
+
+        this.msg.add({
+          severity: 'success',
+          summary: 'Login exitoso',
+          detail: `Bienvenido ${loggedUsername}`,
+        });
+
+        setTimeout(() => {
+          this.router.navigate(['/home']);
+        }, 500);
+      },
+      error: (error) => {
+        console.error('Error en login:', error);
+
+        this.msg.add({
+          severity: 'error',
+          summary: 'Credenciales incorrectas',
+          detail: 'Usuario o contraseña inválidos',
+        });
+
+        this.loading = false;
+      },
+      complete: () => {
+        this.loading = false;
+      },
+    });
+  }
+
+  onLogoClick(): void {
+    this.logoClickCount += 1;
+
+    if (this.logoClickCount < 5) {
       return;
     }
 
-    // ✅ crear sesión
-    localStorage.setItem('token', 'demo-token');
-    localStorage.setItem('loggedUser', foundUser.user);
-
+    this.logoClickCount = 0;
     this.msg.add({
-      severity: 'success',
-      summary: 'Login exitoso',
-      detail: `Bienvenido ${foundUser.user}`,
+      severity: 'info',
+      summary: 'catch u',
+      detail: 'catch u',
     });
-
-    setTimeout(() => this.router.navigate(['/home']), 400);
   }
 }

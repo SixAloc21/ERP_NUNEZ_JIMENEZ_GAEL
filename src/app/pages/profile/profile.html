@@ -1,3 +1,5 @@
+<p-toast></p-toast>
+
 <div class="profile-page">
   <div class="page-header">
     <div>
@@ -7,59 +9,66 @@
   </div>
 
   <p-card header="Perfil de Usuario" class="panel-card">
-    <div class="profile-top">
-      <div class="avatar-lg">
-        {{ currentUser.usuario.charAt(0) }}
+    <ng-container *ngIf="!loadingProfile; else profileLoading">
+      <div class="profile-top">
+        <div class="avatar-lg">
+          {{ currentUser.usuario.charAt(0) }}
+        </div>
+
+        <div>
+          <h2>{{ currentUser.nombreCompleto }}</h2>
+          <p class="muted">{{ currentUser.rol }}</p>
+        </div>
       </div>
 
-      <div>
-        <h2>{{ currentUser.nombreCompleto }}</h2>
-        <p class="muted">{{ currentUser.rol }}</p>
-      </div>
-    </div>
+      <div class="profile-grid">
+        <div class="profile-item">
+          <span class="label">Usuario</span>
+          <p>{{ currentUser.usuario }}</p>
+        </div>
 
-    <div class="profile-grid">
-      <div class="profile-item">
-        <span class="label">Usuario</span>
-        <p>{{ currentUser.usuario }}</p>
+        <div class="profile-item">
+          <span class="label">Email</span>
+          <p>{{ currentUser.email }}</p>
+        </div>
+
+        <div class="profile-item">
+          <span class="label">Nombre completo</span>
+          <p>{{ currentUser.nombreCompleto }}</p>
+        </div>
+
+        <div class="profile-item">
+          <span class="label">Dirección</span>
+          <p>{{ currentUser.direccion || 'Sin dirección registrada' }}</p>
+        </div>
+
+        <div class="profile-item">
+          <span class="label">Teléfono</span>
+          <p>{{ currentUser.telefono || 'Sin teléfono registrado' }}</p>
+        </div>
+
+        <div class="profile-item">
+          <span class="label">Fecha de nacimiento</span>
+          <p>{{ currentUser.fechaNacimiento || 'Sin fecha registrada' }}</p>
+        </div>
       </div>
 
-      <div class="profile-item">
-        <span class="label">Email</span>
-        <p>{{ currentUser.email }}</p>
+      <div class="profile-actions">
+        <button
+          *appHasPermission="'user:edit:profile'"
+          pButton
+          type="button"
+          label="Editar perfil"
+          icon="pi pi-pencil"
+          (click)="openEditProfile()">
+        </button>
       </div>
-
-      <div class="profile-item">
-        <span class="label">Nombre completo</span>
-        <p>{{ currentUser.nombreCompleto }}</p>
-      </div>
-
-      <div class="profile-item">
-        <span class="label">Dirección</span>
-        <p>{{ currentUser.direccion }}</p>
-      </div>
-
-      <div class="profile-item">
-        <span class="label">Teléfono</span>
-        <p>{{ currentUser.telefono }}</p>
-      </div>
-
-      <div class="profile-item">
-        <span class="label">Fecha de nacimiento</span>
-        <p>{{ currentUser.fechaNacimiento }}</p>
-      </div>
-    </div>
-
-    <div class="profile-actions">
-      <button
-        pButton
-        type="button"
-        label="Editar perfil"
-        icon="pi pi-pencil"
-        (click)="openEditProfile()">
-      </button>
-    </div>
+    </ng-container>
   </p-card>
+
+  <ng-template #profileLoading>
+    <p class="empty-text">Cargando perfil...</p>
+  </ng-template>
 
   <div class="summary-grid">
     <div class="summary-card">
@@ -79,7 +88,7 @@
   </div>
 
   <p-card header="Tickets asignados" class="panel-card">
-    <div class="ticket-list" *ngIf="assignedTickets.length; else noTickets">
+    <div class="ticket-list" *ngIf="!loadingTickets && assignedTickets.length; else noTickets">
       <div class="ticket-item" *ngFor="let ticket of assignedTickets">
         <div class="ticket-main">
           <h4>{{ ticket.titulo }}</h4>
@@ -99,7 +108,9 @@
     </div>
 
     <ng-template #noTickets>
-      <p class="empty-text">No hay tickets asignados a este usuario.</p>
+      <p class="empty-text">
+        {{ loadingTickets ? 'Cargando tickets asignados...' : 'No hay tickets asignados a este usuario.' }}
+      </p>
     </ng-template>
   </p-card>
 
@@ -115,7 +126,6 @@
       <input pInputText [(ngModel)]="currentEditUser.nombreCompleto" placeholder="Nombre completo" />
       <input pInputText [(ngModel)]="currentEditUser.direccion" placeholder="Dirección" />
       <input pInputText [(ngModel)]="currentEditUser.telefono" placeholder="Teléfono" />
-      <input pInputText [(ngModel)]="currentEditUser.rol" placeholder="Rol" />
       <input pInputText type="date" [(ngModel)]="currentEditUser.fechaNacimiento" />
     </div>
 
@@ -128,8 +138,10 @@
       </button>
 
       <button
+        *appHasPermission="'user:edit:profile'"
         pButton
         label="Guardar cambios"
+        [loading]="savingProfile"
         (click)="saveProfile()">
       </button>
     </ng-template>

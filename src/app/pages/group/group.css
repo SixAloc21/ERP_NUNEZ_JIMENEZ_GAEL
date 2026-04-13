@@ -1,5 +1,9 @@
 .group-page {
-  padding: 1.5rem;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: clamp(1rem, 2.2vw, 2rem);
+  background: transparent;
 }
 
 .topbar {
@@ -189,12 +193,103 @@
   color: #334155;
 }
 
+.input-group select,
+.input-group textarea {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  padding: 0.75rem 0.85rem;
+  font: inherit;
+  color: #0f172a;
+  background: #ffffff;
+}
+
+.input-group textarea {
+  resize: vertical;
+  min-height: 96px;
+}
+
+.ticket-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.9rem;
+  align-items: end;
+  margin: 0.5rem 0 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 18px;
+  background: #f8fafc;
+}
+
+.ticket-filter-actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+:host ::ng-deep .p-paginator {
+  margin-top: 0.8rem;
+  border-radius: 16px;
+}
+
+.member-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.permission-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.permission-option {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 0.75rem 0.9rem;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.permission-option input {
+  margin: 0;
+}
+
+.permission-option span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: #0f172a;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
 .mt {
   margin-top: 2rem;
 }
 
 .custom-table {
   margin-top: 0.5rem;
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+}
+
+:host ::ng-deep .custom-table .p-datatable-wrapper {
+  max-height: 58vh;
+  overflow: auto;
+  border-radius: 18px;
+}
+
+:host ::ng-deep .custom-table .p-datatable-thead > tr > th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .actions-col {
@@ -745,6 +840,10 @@
     grid-template-columns: 1fr;
   }
 
+  .permission-grid {
+    grid-template-columns: 1fr;
+  }
+
   .comment-form {
     flex-direction: column;
   }
@@ -774,6 +873,7 @@
 
 @media (max-width: 640px) {
   .info-grid,
+  .member-summary-grid,
   .cards,
   .kanban-board {
     grid-template-columns: 1fr;

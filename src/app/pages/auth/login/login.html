@@ -3,9 +3,22 @@
 <div class="auth-bg">
   <div class="auth-card">
     <div class="auth-stack">
+      <button
+        type="button"
+        class="login-logo"
+        aria-label="Logo del login"
+        (click)="onLogoClick()">
+        ERP
+      </button>
+
       <h2 class="auth-title">Iniciar sesión</h2>
 
-      <input pInputText type="text" placeholder="Usuario" [(ngModel)]="usuario" />
+      <input
+        pInputText
+        type="text"
+        placeholder="Correo electrónico"
+        [(ngModel)]="usuario"
+      />
 
       <p-password
         [(ngModel)]="password"
@@ -15,19 +28,21 @@
 
       <p-button
         class="auth-btn"
-        label="Entrar"
+        [label]="loading ? 'Entrando...' : 'Entrar'"
         severity="info"
         [disabled]="!canLogin"
         (onClick)="login()">
       </p-button>
 
-      <a class="auth-link" routerLink="/auth/register">No tengo cuenta → Registrarme</a>
+      <a class="auth-link" routerLink="/auth/register">
+        No tengo cuenta → Registrarme
+      </a>
 
-     <small class="auth-demo">
-      Demo:<br>
-      <b>Gael</b> / <b>Gael!2004##</b> (SuperAdmin)<br>
-      <b>Ana</b> / <b>Ana!2004##</b> (Usuario)
-    </small>
+      <small class="auth-demo">
+        Demo API:<br>
+        <b>admin@marher.com</b> / <b>Demo#12345</b><br>
+        <b>dev@marher.com</b> / <b>Demo#12345</b>
+      </small>
     </div>
   </div>
 </div>

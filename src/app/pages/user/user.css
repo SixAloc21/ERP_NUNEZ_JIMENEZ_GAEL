@@ -1,5 +1,9 @@
 .user-page {
-  padding: 1.5rem;
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: clamp(1rem, 2.2vw, 2rem);
+  background: transparent;
 }
 
 .page-header {
@@ -91,6 +95,21 @@
 
 .custom-table {
   margin-top: 0.35rem;
+  overflow: hidden;
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+}
+
+:host ::ng-deep .custom-table .p-datatable-wrapper {
+  max-height: 64vh;
+  overflow: auto;
+  border-radius: 18px;
+}
+
+:host ::ng-deep .custom-table .p-datatable-thead > tr > th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
 }
 
 .actions-col {

@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -7,11 +7,26 @@ import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
+import { TooltipModule } from 'primeng/tooltip';
+import { PasswordModule } from 'primeng/password';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
-import { AuthService } from '../../services/auth.service';
+import {
+  PermissionService,
+  AppPermission,
+  LoggedUser
+} from '../../services/permission.service';
+import { HasPermissionDirective } from '../../directives/has-permission.directive';
+import {
+  UserApiService,
+  ApiUser,
+  ApiPermissionItem,
+  SaveUserPayload,
+} from '../../services/user-api.service';
 
 interface UserItem {
-  id: number;
+  id: string;
   usuario: string;
   email: string;
   nombreCompleto: string;
@@ -19,7 +34,9 @@ interface UserItem {
   telefono: string;
   fechaNacimiento: string;
   rol: string;
-  permisos: string[];
+  permisos: AppPermission[];
+  password: string;
+  activo: boolean;
 }
 
 @Component({
@@ -32,81 +49,53 @@ interface UserItem {
     TableModule,
     ButtonModule,
     DialogModule,
-    InputTextModule
+    InputTextModule,
+    TooltipModule,
+    PasswordModule,
+    ToastModule,
+    HasPermissionDirective
   ],
+  providers: [MessageService],
   templateUrl: './user.html',
   styleUrls: ['./user.css']
 })
-export class UserComponent {
-  users: UserItem[] = [
-    {
-      id: 1,
-      usuario: 'Gael',
-      email: 'gael@email.com',
-      nombreCompleto: 'Gael Martínez López',
-      direccion: 'Av. Siempre Viva 742',
-      telefono: '4421234567',
-      fechaNacimiento: '2003-05-18',
-      rol: 'SuperAdmin',
-      permisos: [
-        'ver_usuarios',
-        'crear_usuarios',
-        'editar_usuarios',
-        'eliminar_usuarios',
-        'gestionar_permisos'
-      ]
-    },
-    {
-      id: 2,
-      usuario: 'Ana',
-      email: 'ana@email.com',
-      nombreCompleto: 'Ana Torres García',
-      direccion: 'Calle Luna 15',
-      telefono: '4424567890',
-      fechaNacimiento: '2002-11-10',
-      rol: 'Frontend Dev',
-      permisos: ['ver_usuarios', 'editar_usuarios']
-    },
-    {
-      id: 3,
-      usuario: 'Luis',
-      email: 'luis@email.com',
-      nombreCompleto: 'Luis Pérez Sánchez',
-      direccion: 'Col. Centro 120',
-      telefono: '4429876543',
-      fechaNacimiento: '2001-08-25',
-      rol: 'UI Designer',
-      permisos: ['ver_usuarios']
-    }
-  ];
+export class UserComponent implements OnInit {
+  users: UserItem[] = [];
 
-  availablePermissions: string[] = [
-    'ver_usuarios',
-    'crear_usuarios',
-    'editar_usuarios',
-    'eliminar_usuarios',
-    'gestionar_permisos'
-  ];
+  availablePermissions: AppPermission[] = [];
 
   loggedUser = '';
 
   userDialogVisible = false;
   permissionsDialogVisible = false;
+  loadingUsers = false;
+  savingUser = false;
+  savingPermissions = false;
+  deletingUserId: string | null = null;
 
   currentEditUser: UserItem = this.emptyUser();
   currentPermissionUser: UserItem = this.emptyUser();
 
-  private userIdCounter = 4;
+  constructor(
+    public permissionService: PermissionService,
+    private userApiService: UserApiService,
+    private messageService: MessageService
+  ) {}
 
-  constructor(public auth: AuthService) {
-    this.loggedUser = localStorage.getItem('loggedUser') || '';
-    this.auth.loggedUser = this.loggedUser;
-    this.auth.setUsers(this.users);
+  ngOnInit(): void {
+    const currentUser: LoggedUser | null = this.permissionService.getUser();
+
+    if (currentUser) {
+      this.loggedUser = currentUser.username;
+    }
+
+    this.loadUsers();
+    this.loadPermissions();
   }
 
   emptyUser(): UserItem {
     return {
-      id: 0,
+      id: '',
       usuario: '',
       email: '',
       nombreCompleto: '',
@@ -114,7 +103,9 @@ export class UserComponent {
       telefono: '',
       fechaNacimiento: '',
       rol: '',
-      permisos: []
+      permisos: [],
+      password: '',
+      activo: true
     };
   }
 
@@ -126,19 +117,15 @@ export class UserComponent {
     return this.currentLoggedUser?.rol === 'SuperAdmin';
   }
 
-  refreshAuthUsers(): void {
-    this.auth.setUsers(this.users);
-  }
-
   openNewUser(): void {
-    if (!this.auth.hasPermission('crear_usuarios')) return;
+    if (!this.permissionService.hasPermission('user:add')) return;
 
     this.currentEditUser = this.emptyUser();
     this.userDialogVisible = true;
   }
 
   editUser(user: UserItem): void {
-    if (!this.auth.hasPermission('editar_usuarios')) return;
+    if (!this.permissionService.hasPermission('user:edit')) return;
 
     this.currentEditUser = {
       ...user,
@@ -148,54 +135,88 @@ export class UserComponent {
   }
 
   saveUser(): void {
+    if (this.savingUser) return;
+    const isNewUser = !this.currentEditUser.id;
+
     if (
       !this.currentEditUser.usuario.trim() ||
       !this.currentEditUser.email.trim() ||
-      !this.currentEditUser.nombreCompleto.trim() ||
-      !this.currentEditUser.direccion.trim() ||
-      !this.currentEditUser.telefono.trim() ||
-      !this.currentEditUser.fechaNacimiento.trim() ||
-      !this.currentEditUser.rol.trim()
+      !this.currentEditUser.nombreCompleto.trim()
     ) {
+      this.showWarn('Completa los campos obligatorios del usuario');
       return;
     }
 
-    if (this.currentEditUser.id === 0) {
-      this.currentEditUser.id = this.userIdCounter++;
-
-      if (!this.currentEditUser.permisos.length) {
-        this.currentEditUser.permisos = ['ver_usuarios'];
-      }
-
-      this.users.push({
-        ...this.currentEditUser,
-        permisos: [...this.currentEditUser.permisos]
-      });
-    } else {
-      const index = this.users.findIndex(u => u.id === this.currentEditUser.id);
-
-      if (index !== -1) {
-        this.users[index] = {
-          ...this.currentEditUser,
-          permisos: [...this.currentEditUser.permisos]
-        };
-      }
+    if (isNewUser && !this.currentEditUser.password.trim()) {
+      this.showWarn('La contraseña es obligatoria al crear un usuario');
+      return;
     }
 
-    this.refreshAuthUsers();
-    this.userDialogVisible = false;
+    if (isNewUser && !this.permissionService.hasPermission('user:add')) return;
+    if (!isNewUser && !this.permissionService.hasPermission('user:edit')) return;
+
+    this.savingUser = true;
+
+    const payload = this.buildSavePayload(this.currentEditUser);
+
+    if (isNewUser) {
+      this.userApiService.createUser(payload).subscribe({
+        next: () => {
+          this.showSuccess('Usuario creado correctamente');
+          this.userDialogVisible = false;
+          this.currentEditUser = this.emptyUser();
+          this.loadUsers();
+        },
+        error: (error) => {
+          this.handleHttpError(error, 'No se pudo crear el usuario');
+          this.savingUser = false;
+        },
+        complete: () => {
+          this.savingUser = false;
+        }
+      });
+    } else {
+      this.userApiService.updateUser(this.currentEditUser.id, payload).subscribe({
+        next: () => {
+          this.showSuccess('Usuario actualizado correctamente');
+          this.userDialogVisible = false;
+          this.currentEditUser = this.emptyUser();
+          this.loadUsers();
+        },
+        error: (error) => {
+          this.handleHttpError(error, 'No se pudo actualizar el usuario');
+          this.savingUser = false;
+        },
+        complete: () => {
+          this.savingUser = false;
+        }
+      });
+    }
   }
 
   deleteUser(user: UserItem): void {
-    if (!this.auth.hasPermission('eliminar_usuarios')) return;
+    if (!this.permissionService.hasPermission('user:delete')) return;
     if (user.usuario === this.loggedUser) return;
 
-    this.users = this.users.filter(u => u.id !== user.id);
-    this.refreshAuthUsers();
+    this.deletingUserId = user.id;
+
+    this.userApiService.deleteUser(user.id).subscribe({
+      next: () => {
+        this.showSuccess('Usuario eliminado correctamente');
+        this.loadUsers();
+      },
+      error: (error) => {
+        this.handleHttpError(error, 'No se pudo eliminar el usuario');
+        this.deletingUserId = null;
+      },
+      complete: () => {
+        this.deletingUserId = null;
+      }
+    });
   }
 
   openPermissions(user: UserItem): void {
-    if (!this.auth.hasPermission('gestionar_permisos')) return;
+    if (!this.permissionService.hasPermission('user:edit')) return;
 
     this.currentPermissionUser = {
       ...user,
@@ -204,14 +225,14 @@ export class UserComponent {
     this.permissionsDialogVisible = true;
   }
 
-  hasPermission(permission: string): boolean {
+  hasPermission(permission: AppPermission): boolean {
     return this.currentPermissionUser.permisos.includes(permission);
   }
 
-  togglePermission(permission: string): void {
-    const exists = this.currentPermissionUser.permisos.includes(permission);
+  togglePermission(permission: AppPermission): void {
+    if (!this.permissionService.hasPermission('user:edit')) return;
 
-    if (exists) {
+    if (this.hasPermission(permission)) {
       this.currentPermissionUser.permisos =
         this.currentPermissionUser.permisos.filter(p => p !== permission);
     } else {
@@ -220,40 +241,229 @@ export class UserComponent {
   }
 
   savePermissions(): void {
-    const index = this.users.findIndex(u => u.id === this.currentPermissionUser.id);
+    if (this.savingPermissions) return;
+    if (!this.permissionService.hasPermission('user:edit')) return;
 
-    if (index !== -1) {
-      this.users[index] = {
-        ...this.currentPermissionUser,
-        permisos: [...this.currentPermissionUser.permisos]
-      };
-    }
+    this.savingPermissions = true;
 
-    this.refreshAuthUsers();
-    this.permissionsDialogVisible = false;
+    this.userApiService
+      .updateGlobalPermissions(
+        this.currentPermissionUser.id,
+        this.currentPermissionUser.permisos
+      )
+      .subscribe({
+        next: () => {
+          this.showSuccess('Permisos actualizados correctamente');
+          this.permissionsDialogVisible = false;
+          this.currentPermissionUser = this.emptyUser();
+          this.loadUsers();
+        },
+        error: (error) => {
+          this.handleHttpError(error, 'No se pudieron actualizar los permisos');
+          this.savingPermissions = false;
+        },
+        complete: () => {
+          this.savingPermissions = false;
+        }
+      });
   }
 
-  getPermissionLabel(permission: string): string {
-    const labels: Record<string, string> = {
-      ver_usuarios: 'Ver usuarios',
-      crear_usuarios: 'Crear usuarios',
-      editar_usuarios: 'Editar usuarios',
-      eliminar_usuarios: 'Eliminar usuarios',
-      gestionar_permisos: 'Gestionar permisos'
+  private loadUsers(): void {
+    this.loadingUsers = true;
+
+    this.userApiService.listUsers().subscribe({
+      next: (response) => {
+        this.users = response.data.map(user => this.mapApiUser(user));
+      },
+      error: (error) => {
+        this.handleHttpError(error, 'No se pudieron cargar los usuarios');
+        this.loadingUsers = false;
+      },
+      complete: () => {
+        this.loadingUsers = false;
+      }
+    });
+  }
+
+  private loadPermissions(): void {
+    this.userApiService.listGlobalPermissions().subscribe({
+      next: (response) => {
+        this.availablePermissions = response.data.map(
+          (permission: ApiPermissionItem) =>
+            this.permissionService.normalizePermissionName(permission.nombre) as AppPermission
+        );
+      },
+      error: (error) => {
+        this.handleHttpError(error, 'No se pudo cargar el catálogo de permisos');
+      }
+    });
+  }
+
+  private mapApiUser(user: ApiUser): UserItem {
+    const permisos = this.permissionService.normalizePermissions(user.permisos || []);
+
+    return {
+      id: user.id,
+      usuario: user.username,
+      email: user.email,
+      nombreCompleto: user.nombre_completo,
+      direccion: user.direccion || '',
+      telefono: user.telefono || '',
+      fechaNacimiento: user.fecha_inicio || '',
+      rol: this.getRoleFromPermissions(permisos),
+      permisos,
+      password: '',
+      activo: user.activo,
+    };
+  }
+
+  private buildSavePayload(user: UserItem): SaveUserPayload {
+    const payload: SaveUserPayload = {
+      nombre_completo: user.nombreCompleto.trim(),
+      username: user.usuario.trim(),
+      email: user.email.trim().toLowerCase(),
+    };
+
+    if (user.direccion.trim()) {
+      payload.direccion = user.direccion.trim();
+    }
+
+    if (user.telefono.trim()) {
+      payload.telefono = user.telefono.trim();
+    }
+
+    if (user.fechaNacimiento.trim()) {
+      payload.fecha_inicio = user.fechaNacimiento.trim();
+    }
+
+    if (user.password.trim()) {
+      payload.password = user.password.trim();
+    }
+
+    return payload;
+  }
+
+  private getRoleFromPermissions(permissions: AppPermission[]): string {
+    if (
+      permissions.includes('user:manage') &&
+      permissions.includes('group:manage') &&
+      permissions.includes('tickets:manage')
+    ) {
+      return 'SuperAdmin';
+    }
+
+    if (
+      permissions.includes('group:manage') &&
+      permissions.includes('tickets:manage')
+    ) {
+      return 'Project Manager';
+    }
+
+    if (
+      permissions.includes('tickets:edit') &&
+      permissions.includes('tickets:move')
+    ) {
+      return 'Developer';
+    }
+
+    if (permissions.includes('tickets:comment')) {
+      return 'Support';
+    }
+
+    return 'Usuario';
+  }
+
+  private handleHttpError(error: unknown, fallbackMessage: string): void {
+    const detail =
+      (error as { error?: { data?: { error?: string; message?: string } } })?.error?.data
+        ?.error ||
+      (error as { error?: { data?: { message?: string } } })?.error?.data?.message ||
+      fallbackMessage;
+
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Error',
+      detail,
+    });
+  }
+
+  private showSuccess(detail: string): void {
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Correcto',
+      detail,
+    });
+  }
+
+  private showWarn(detail: string): void {
+    this.messageService.add({
+      severity: 'warn',
+      summary: 'Atención',
+      detail,
+    });
+  }
+
+  getPermissionLabel(permission: AppPermission): string {
+    const labels: Partial<Record<AppPermission, string>> = {
+      'user:view': 'Ver usuarios',
+      'user:add': 'Agregar usuarios',
+      'user:edit': 'Editar usuarios',
+      'user:edit:profile': 'Editar perfil',
+      'user:delete': 'Eliminar usuarios',
+      'user:manage': 'Gestionar usuarios',
+      'group:view': 'Ver grupos',
+      'group:add': 'Agregar grupos',
+      'group:edit': 'Editar grupos',
+      'group:delete': 'Eliminar grupos',
+      'group:manage': 'Gestionar grupos',
+      'ticket:view': 'Ver tickets',
+      'ticket:add': 'Agregar tickets',
+      'ticket:edit': 'Editar tickets',
+      'ticket:delete': 'Eliminar tickets',
+      'ticket:edit:state': 'Mover tickets',
+      'ticket:edit:comment': 'Comentar tickets',
+      'ticket:manage': 'Gestionar tickets',
+      'tickets:view': 'Ver tickets',
+      'tickets:add': 'Agregar tickets',
+      'tickets:edit': 'Editar tickets',
+      'tickets:delete': 'Eliminar tickets',
+      'tickets:move': 'Mover tickets',
+      'tickets:comment': 'Comentar tickets',
+      'tickets:manage': 'Gestionar tickets'
     };
 
     return labels[permission] || permission;
   }
 
-  getPermissionIcon(permission: string): string {
-    const icons: Record<string, string> = {
-      ver_usuarios: 'pi pi-eye',
-      crear_usuarios: 'pi pi-plus-circle',
-      editar_usuarios: 'pi pi-pencil',
-      eliminar_usuarios: 'pi pi-trash',
-      gestionar_permisos: 'pi pi-key'
+  getPermissionIcon(permission: AppPermission): string {
+    const icons: Partial<Record<AppPermission, string>> = {
+      'user:view': 'pi-eye',
+      'user:add': 'pi-user-plus',
+      'user:edit': 'pi-pencil',
+      'user:edit:profile': 'pi-user-edit',
+      'user:delete': 'pi-trash',
+      'user:manage': 'pi-users',
+      'group:view': 'pi-folder-open',
+      'group:add': 'pi-plus-circle',
+      'group:edit': 'pi-file-edit',
+      'group:delete': 'pi-times-circle',
+      'group:manage': 'pi-sitemap',
+      'ticket:view': 'pi-ticket',
+      'ticket:add': 'pi-plus',
+      'ticket:edit': 'pi-pencil',
+      'ticket:delete': 'pi-trash',
+      'ticket:edit:state': 'pi-refresh',
+      'ticket:edit:comment': 'pi-comments',
+      'ticket:manage': 'pi-briefcase',
+      'tickets:view': 'pi-ticket',
+      'tickets:add': 'pi-plus',
+      'tickets:edit': 'pi-pencil',
+      'tickets:delete': 'pi-trash',
+      'tickets:move': 'pi-refresh',
+      'tickets:comment': 'pi-comments',
+      'tickets:manage': 'pi-briefcase'
     };
 
-    return icons[permission] || 'pi pi-shield';
+    return icons[permission] || 'pi-shield';
   }
 }

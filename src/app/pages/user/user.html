@@ -1,4 +1,6 @@
-<div class="user-page" *ngIf="auth.hasPermission('ver_usuarios')">
+<p-toast></p-toast>
+
+<div class="user-page">
   <div class="page-header">
     <div>
       <h1>
@@ -15,7 +17,7 @@
       </div>
 
       <button
-        *ngIf="auth.hasPermission('crear_usuarios')"
+        *appHasPermission="'user:add'"
         pButton
         type="button"
         label="Agregar usuario"
@@ -39,7 +41,7 @@
       </div>
     </ng-template>
 
-    <p-table [value]="users" class="custom-table">
+    <p-table [value]="users" class="custom-table" [loading]="loadingUsers">
       <ng-template pTemplate="header">
         <tr>
           <th>Usuario</th>
@@ -92,7 +94,7 @@
 
           <td class="action-buttons">
             <button
-              *ngIf="auth.hasPermission('gestionar_permisos')"
+              *appHasPermission="'user:edit'"
               pButton
               type="button"
               icon="pi pi-key"
@@ -103,7 +105,7 @@
             </button>
 
             <button
-              *ngIf="auth.hasPermission('editar_usuarios')"
+              *appHasPermission="'user:edit'"
               pButton
               type="button"
               icon="pi pi-pencil"
@@ -114,7 +116,7 @@
             </button>
 
             <button
-              *ngIf="auth.hasPermission('eliminar_usuarios') && user.usuario !== loggedUser"
+              *ngIf="permissionService.hasPermission('user:delete') && user.usuario !== loggedUser"
               pButton
               type="button"
               icon="pi pi-trash"
@@ -130,7 +132,7 @@
   </p-card>
 
   <p-dialog
-    [header]="currentEditUser.id === 0 ? 'Nuevo usuario' : 'Editar usuario'"
+    [header]="!currentEditUser.id ? 'Nuevo usuario' : 'Editar usuario'"
     [(visible)]="userDialogVisible"
     [modal]="true"
     [style]="{ width: '520px' }">
@@ -162,12 +164,17 @@
       </div>
 
       <div class="input-group">
-        <label><i class="pi pi-briefcase"></i> Rol</label>
-        <input pInputText [(ngModel)]="currentEditUser.rol" placeholder="Rol" />
+        <label><i class="pi pi-lock"></i> Contraseña</label>
+        <p-password
+          [(ngModel)]="currentEditUser.password"
+          [toggleMask]="true"
+          [feedback]="false"
+          [placeholder]="currentEditUser.id ? 'Opcional para actualizar' : 'Contraseña obligatoria'">
+        </p-password>
       </div>
 
       <div class="input-group">
-        <label><i class="pi pi-calendar"></i> Fecha de nacimiento</label>
+        <label><i class="pi pi-calendar"></i> Fecha de inicio</label>
         <input pInputText type="date" [(ngModel)]="currentEditUser.fechaNacimiento" />
       </div>
     </div>
@@ -185,7 +192,7 @@
       <button
         pButton
         type="button"
-        [label]="currentEditUser.id === 0 ? 'Crear usuario' : 'Guardar cambios'"
+        [label]="!currentEditUser.id ? 'Crear usuario' : 'Guardar cambios'"
         icon="pi pi-save"
         (click)="saveUser()">
       </button>
@@ -251,16 +258,4 @@
       </button>
     </ng-template>
   </p-dialog>
-</div>
-
-<div class="user-page" *ngIf="!auth.hasPermission('ver_usuarios')">
-  <p-card class="panel-card">
-    <div class="no-access-box">
-      <div class="no-access-icon">
-        <i class="pi pi-lock"></i>
-      </div>
-      <h3>Sin acceso</h3>
-      <p>No tienes permisos para visualizar la gestión de usuarios.</p>
-    </div>
-  </p-card>
 </div>

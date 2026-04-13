@@ -1,5 +1,4 @@
 <aside class="sb">
-  <!-- Brand -->
   <div class="brand">
     <div class="logo">A</div>
 
@@ -9,63 +8,31 @@
     </div>
   </div>
 
-  <!-- User -->
- <div class="user clickable-user" (click)="goToProfile()">
-  <div class="avatar">{{ usuario.charAt(0) }}</div>
+  <div class="user clickable-user" (click)="goToProfile()">
+    <div class="avatar">{{ usuario.charAt(0) }}</div>
 
-  <div class="user-txt">
-    <div class="name">{{ usuario }}</div>
-    <div class="role">Usuario activo</div>
+    <div class="user-txt">
+      <div class="name">{{ usuario }}</div>
+      <div class="role">Usuario activo</div>
+    </div>
   </div>
-</div>
 
-  <!-- Menu -->
   <nav class="menu">
-    <div class="section">General</div>
+    <ng-container *ngFor="let group of menu">
+      <div class="section">{{ group.section }}</div>
 
-    <a routerLink="/home" routerLinkActive="active" class="item">
-      <span class="dot"></span>
-      <span>Dashboard</span>
-    </a>
-
-    <div class="section">Gestión</div>
-
-    <a routerLink="/group" routerLinkActive="active" class="item">
-      <span class="dot"></span>
-      <span>Grupos</span>
-    </a>
-
-    <a routerLink="/user" routerLinkActive="active" class="item">
-      <span class="dot"></span>
-      <span>Usuarios</span>
-    </a>
-
-    <div class="section">Módulos</div>
-
-    <a
-      routerLink="/ofertas"
-      routerLinkActive="active"
-      class="item disabled"
-      tabindex="-1"
-      aria-disabled="true"
-    >
-      <span class="dot"></span>
-      <span>Ofertas (próx.)</span>
-    </a>
-
-    <a
-      routerLink="/divisiones"
-      routerLinkActive="active"
-      class="item disabled"
-      tabindex="-1"
-      aria-disabled="true"
-    >
-      <span class="dot"></span>
-      <span>Divisiones (próx.)</span>
-    </a>
+      <a
+        *ngFor="let item of group.items"
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        class="item"
+      >
+        <span class="dot"></span>
+        <span>{{ item.label }}</span>
+      </a>
+    </ng-container>
   </nav>
 
-  <!-- Footer -->
   <div class="footer">
     <button
       pButton

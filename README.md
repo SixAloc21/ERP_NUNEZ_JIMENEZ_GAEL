@@ -1,59 +1,115 @@
-# ProyectoEjemplo
+# Proyecto ERP Tickets
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+Proyecto local de gestion de tickets con frontend Angular y microservicios backend conectados a Supabase/PostgreSQL.
 
-## Development server
+## Estructura
 
-To start a local development server, run:
+- `src/`: frontend Angular.
+- `user-service/`: microservicio Express para login, registro, usuarios, perfil y permisos globales.
+- `groups-service/`: microservicio Express para grupos, integrantes y permisos por grupo.
+- `tickets-service/`: microservicio Fastify para tickets, comentarios, historial, paginacion y estadisticas.
+- `api-gateway/`: gateway Fastify que centraliza `/api/auth`, `/api/users`, `/api/groups` y `/api/tickets`.
 
-```bash
-ng serve
-```
+## Requisitos
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+- Node.js y npm.
+- Base de datos Supabase/PostgreSQL con las tablas del proyecto.
+- Archivos `.env` locales en cada servicio, usando como guia los `.env.example`.
 
-## Code scaffolding
+## Levantar el proyecto local
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
-```
-
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Ejecutar cada comando en una terminal distinta:
 
 ```bash
-ng generate --help
+cd C:\Users\nunez\proyecto-ejemplo\user-service
+npm run dev
 ```
-
-## Building
-
-To build the project run:
 
 ```bash
-ng build
+cd C:\Users\nunez\proyecto-ejemplo\groups-service
+npm run dev
 ```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
 
 ```bash
-ng test
+cd C:\Users\nunez\proyecto-ejemplo\tickets-service
+npm run dev
 ```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
 
 ```bash
-ng e2e
+cd C:\Users\nunez\proyecto-ejemplo\api-gateway
+npm run dev
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+```bash
+cd C:\Users\nunez\proyecto-ejemplo
+npm start
+```
 
-## Additional Resources
+## Puertos locales
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Frontend: `http://localhost:4200`
+- User service: `http://localhost:3000`
+- Groups service: `http://localhost:3002`
+- Tickets service: `http://localhost:3003`
+- API Gateway: `http://localhost:4000`
+
+## Health check
+
+El gateway incluye un endpoint de salud para validar que los servicios esten arriba:
+
+```http
+GET http://localhost:4000/health
+```
+
+## Rate limiting
+
+El API Gateway limita requests por usuario autenticado o por IP cuando no hay token. La configuracion por defecto es `100` requests por minuto:
+
+```env
+RATE_LIMIT_MAX_REQUESTS=100
+RATE_LIMIT_WINDOW_MS=60000
+```
+
+Si se excede el limite, el gateway responde `429` con el esquema global y el mensaje `Too many requests`.
+
+## Credenciales demo
+
+Despues de ejecutar el seed limpio:
+
+- Superadmin: `admin@marher.com` / `Demo#12345`
+- Usuario dev: `dev@marher.com` / `Demo#12345`
+
+El superadmin queda con todos los permisos globales y todos los permisos por grupo.
+
+## Formato de respuesta API
+
+Los servicios responden con el formato:
+
+```json
+{
+  "statusCode": 200,
+  "intOpCode": "SxGW001",
+  "data": {}
+}
+```
+
+## Endpoints principales por gateway
+
+- `POST /api/auth/login`
+- `POST /api/auth/register`
+- `GET /api/users`
+- `GET /api/users/me`
+- `PATCH /api/users/me`
+- `GET /api/groups`
+- `POST /api/groups`
+- `GET /api/tickets`
+- `POST /api/tickets`
+- `GET /api/tickets/stats`
+
+## Verificacion rapida
+
+```bash
+npm run build
+```
+
+El build puede mostrar warnings de presupuesto de bundle/estilos, pero no debe fallar.

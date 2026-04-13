@@ -45,6 +45,23 @@
   position: relative;
 }
 
+.login-logo {
+  width: 54px;
+  height: 54px;
+  border: 0;
+  border-radius: 18px;
+  background: #0f172a;
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.22);
+}
+
+.login-logo:hover {
+  transform: translateY(-1px);
+}
+
 /* título */
 .auth-title{
   margin: 0 0 6px;

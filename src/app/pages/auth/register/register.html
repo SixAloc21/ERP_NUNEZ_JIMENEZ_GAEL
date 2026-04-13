@@ -3,59 +3,157 @@
 <div class="auth-bg auth-bg-register">
   <div class="auth-card auth-card-register">
     <div class="auth-stack">
-      <h2 class="auth-title">Registro</h2>
+      <div class="auth-header">
+        <p class="auth-eyebrow">Acceso al sistema</p>
+        <h2 class="auth-title">Crear cuenta</h2>
+        <p class="auth-subtitle">
+          Completa tu información para registrarte en el ERP de tickets.
+        </p>
+      </div>
 
-      <input pInputText type="text" placeholder="Usuario" [(ngModel)]="usuario" />
-      <p-message *ngIf="usuario !== '' && usuario.trim().length === 0"
-                 severity="warn" text="Usuario no puede estar vacío"></p-message>
+      <div class="form-section">
+        <label class="field-label">Usuario</label>
+        <input
+          pInputText
+          type="text"
+          placeholder="Ingresa tu usuario"
+          [(ngModel)]="usuario"
+        />
+        <p-message
+          *ngIf="usuario !== '' && usuario.trim().length === 0"
+          severity="warn"
+          text="El usuario no puede estar vacío">
+        </p-message>
+      </div>
 
-      <input pInputText type="email" placeholder="Email" [(ngModel)]="email" />
-      <p-message *ngIf="email && !isEmailValid()"
-                 severity="warn" text="Email inválido"></p-message>
+      <div class="form-section">
+        <label class="field-label">Correo electrónico</label>
+        <input
+          pInputText
+          type="email"
+          placeholder="Ingresa tu correo"
+          [(ngModel)]="email"
+        />
+        <p-message
+          *ngIf="email && !isEmailValid()"
+          severity="warn"
+          text="Ingresa un correo válido">
+        </p-message>
+      </div>
 
-      <input pInputText type="text" placeholder="Nombre completo" [(ngModel)]="nombreCompleto" />
-      <p-message *ngIf="nombreCompleto !== '' && nombreCompleto.trim().length === 0"
-                 severity="warn" text="Nombre completo requerido"></p-message>
+      <div class="form-section">
+        <label class="field-label">Nombre completo</label>
+        <input
+          pInputText
+          type="text"
+          placeholder="Ingresa tu nombre completo"
+          [(ngModel)]="nombreCompleto"
+        />
+        <p-message
+          *ngIf="nombreCompleto !== '' && nombreCompleto.trim().length === 0"
+          severity="warn"
+          text="El nombre completo es requerido">
+        </p-message>
+      </div>
 
-      <input pInputText type="text" placeholder="Dirección" [(ngModel)]="direccion" />
-      <p-message *ngIf="direccion !== '' && direccion.trim().length === 0"
-                 severity="warn" text="Dirección requerida"></p-message>
+      <div class="form-section">
+        <label class="field-label">Dirección</label>
+        <input
+          pInputText
+          type="text"
+          placeholder="Ingresa tu dirección"
+          [(ngModel)]="direccion"
+        />
+        <p-message
+          *ngIf="direccion !== '' && direccion.trim().length === 0"
+          severity="warn"
+          text="La dirección es requerida">
+        </p-message>
+      </div>
 
-      <p-inputMask mask="9999999999" placeholder="Teléfono (10 dígitos)" [(ngModel)]="telefono"></p-inputMask>
-      <p-message *ngIf="telefono && !isPhoneValid()"
-                 severity="warn" text="Teléfono inválido (10 números)"></p-message>
+      <div class="form-section">
+        <label class="field-label">Teléfono</label>
+        <p-inputMask
+          mask="9999999999"
+          placeholder="Teléfono (10 dígitos)"
+          [(ngModel)]="telefono">
+        </p-inputMask>
+        <p-message
+          *ngIf="telefono && !isPhoneValid()"
+          severity="warn"
+          text="Ingresa un teléfono válido de 10 dígitos">
+        </p-message>
+      </div>
 
-      <p-datepicker [(ngModel)]="fechaNacimiento"
-                    placeholder="Fecha de nacimiento"
-                    [showIcon]="true"></p-datepicker>
+      <div class="form-section">
+        <label class="field-label">Fecha de nacimiento</label>
+        <p-datepicker
+          [(ngModel)]="fechaNacimiento"
+          placeholder="Selecciona tu fecha de nacimiento"
+          [showIcon]="true">
+        </p-datepicker>
+        <p-message
+          *ngIf="fechaNacimiento && !isAdult()"
+          severity="error"
+          text="El registro es solo para mayores de edad">
+        </p-message>
+      </div>
 
-      <p-message *ngIf="fechaNacimiento && !isAdult()"
-                 severity="error" text="Solo mayores de edad (18+)"></p-message>
+      <div class="form-section">
+        <label class="field-label">Contraseña</label>
+        <p-password
+          [(ngModel)]="password"
+          placeholder="Crea una contraseña"
+          [toggleMask]="true"
+          [feedback]="false">
+        </p-password>
 
-      <p-password [(ngModel)]="password"
-                  placeholder="Contraseña"
-                  [toggleMask]="true"></p-password>
+        <p-message
+          *ngIf="password && password.length < 10"
+          severity="warn"
+          text="La contraseña debe tener al menos 10 caracteres">
+        </p-message>
 
-      <p-message *ngIf="password && password.length < 10"
-                 severity="warn" text="Mínimo 10 caracteres"></p-message>
+        <p-message
+          *ngIf="password && password.length >= 10 && !hasSpecialSymbol(password)"
+          severity="warn"
+          text="Incluye al menos un símbolo especial: ! @ # $ % ^ & *">
+        </p-message>
+      </div>
 
-      <p-message *ngIf="password && password.length >= 10 && !hasSpecialSymbol(password)"
-                 severity="warn" text="Debe incluir al menos 1 símbolo: ! @ # $ % ^ & *"></p-message>
+      <div class="form-section">
+        <label class="field-label">Confirmar contraseña</label>
+        <p-password
+          [(ngModel)]="confirmPassword"
+          placeholder="Confirma tu contraseña"
+          [toggleMask]="true"
+          [feedback]="false">
+        </p-password>
 
-      <p-password [(ngModel)]="confirmPassword"
-                  placeholder="Confirmar contraseña"
-                  [toggleMask]="true"></p-password>
+        <p-message
+          *ngIf="confirmPassword && !isConfirmValid()"
+          severity="error"
+          text="Las contraseñas no coinciden">
+        </p-message>
+      </div>
 
-      <p-message *ngIf="confirmPassword && !isConfirmValid()"
-                 severity="error" text="Las contraseñas no coinciden"></p-message>
+      <div class="auth-helper">
+        <small>
+          La contraseña debe tener al menos 10 caracteres, un símbolo especial y el usuario debe ser mayor de 18 años.
+        </small>
+      </div>
 
-      <p-button class="auth-btn"
-                label="Registrarme"
-                severity="success"
-                [disabled]="!canSubmit"
-                (onClick)="register()"></p-button>
+      <p-button
+        class="auth-btn"
+        [label]="loading ? 'Registrando...' : 'Registrarme'"
+        severity="success"
+        [disabled]="!canSubmit || loading"
+        (onClick)="register()">
+      </p-button>
 
-      <a class="auth-link" routerLink="/auth/login">Ya tengo cuenta → Login</a>
+      <a class="auth-link" routerLink="/auth/login">
+        Ya tengo cuenta → Iniciar sesión
+      </a>
     </div>
   </div>
 </div>
