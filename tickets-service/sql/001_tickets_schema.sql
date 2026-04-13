@@ -1,0 +1,9 @@
+-- Este microservicio usa las tablas ya definidas en tu esquema principal:
+-- estados
+-- prioridades
+-- tickets
+-- comentarios
+-- historial_tickets
+--
+-- Si ya corriste el SQL general del proyecto en Supabase, no necesitas ejecutar
+-- otro script extra para este servicio.
